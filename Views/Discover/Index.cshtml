@@ -1,0 +1,164 @@
+﻿@{
+    Layout = null;
+}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Discover Matches</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        .tinder-card {
+            max-width: 400px;
+            margin: 0 auto;
+            transition: transform 0.3s;
+        }
+
+            .tinder-card:hover {
+                transform: scale(1.02);
+            }
+    </style>
+</head>
+<body class="bg-light">
+
+    <div class="container mt-5 text-center">
+        <h2 class="fw-bold">Study Partner Match 🧬</h2>
+        <p class="text-muted">Algorithmically finding your best peer.</p>
+
+        <div id="card-container" class="mt-4">
+            <div class="spinner-border text-primary"></div>
+            <p>Running compatibility heuristic...</p>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-app.js";
+        import { getFirestore, collection, getDocs, getDoc, doc } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-firestore.js";
+        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-auth.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyDrkRtgGhFWSvEiDr5pZy2sGDHI8HCpPt0",
+            authDomain: "cramrades.firebaseapp.com",
+            projectId: "cramrades",
+            storageBucket: "cramrades.firebasestorage.app",
+            messagingSenderId: "421414498264",
+            appId: "1:421414498264:web:58e04c186d5bdea7c88cad"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        const auth = getAuth(app);
+
+        // GLOBAL VARIABLES TO TRACK MATCHES
+        let allMatches = []; // Store the full list here
+        let currentIndex = 0; // Track which user we are showing
+
+        function calculateScore(me, candidate) {
+            let score = 0;
+            let reasons = [];
+
+            const mySubjs = me.skills.map(s => s.subject);
+            const theirSubjs = candidate.skills.map(s => s.subject);
+            const common = mySubjs.filter(x => theirSubjs.includes(x));
+
+            if(common.length > 0) {
+                score += 40;
+                reasons.push(`Studies ${common[0]}`);
+            }
+
+            common.forEach(sub => {
+                const mySkill = me.skills.find(s => s.subject === sub).level;
+                const theirSkill = candidate.skills.find(s => s.subject === sub).level;
+
+                if(mySkill === "Beginner" && theirSkill === "Advanced") {
+                    score += 30;
+                    reasons.push("Can mentor you in " + sub);
+                } else if (mySkill === theirSkill) {
+                    score += 15;
+                    reasons.push("Same skill level");
+                }
+            });
+
+            if(me.availability && candidate.availability) {
+                const overlap = me.availability.filter(d => candidate.availability.includes(d));
+                if(overlap.length > 0) {
+                    score += 20;
+                    reasons.push(`Free on ${overlap.join(", ")}`);
+                }
+            }
+            return { score, reasons };
+        }
+
+        onAuthStateChanged(auth, async (user) => {
+            if (!user) { window.location.href = "/Auth/SignUp"; return; }
+
+            const mySnap = await getDoc(doc(db, "users", user.uid));
+            const me = mySnap.data();
+            const allSnap = await getDocs(collection(db, "users"));
+
+            allMatches = []; // Reset list
+
+            allSnap.forEach(doc => {
+                if(doc.id === user.uid) return;
+                const candidate = doc.data();
+                const result = calculateScore(me, candidate);
+                // Only add people with at least some compatibility (> 0)
+                if (result.score > 0) {
+                    allMatches.push({ ...candidate, ...result });
+                }
+            });
+
+            // SORT HIGHEST TO LOWEST
+            allMatches.sort((a, b) => b.score - a.score);
+
+            // Render the first one
+            renderCard();
+        });
+
+        // 1. Function to show the current card
+        function renderCard() {
+            const container = document.getElementById("card-container");
+            container.innerHTML = "";
+
+            // Check if we ran out of people
+            if (currentIndex >= allMatches.length) {
+                container.innerHTML = `
+                    <div class="text-center mt-5">
+                        <h3>🏁 No more matches!</h3>
+                        <p class="text-muted">You've viewed everyone in the database.</p>
+                        <button onclick="location.reload()" class="btn btn-outline-secondary">Start Over</button>
+                    </div>
+                `;
+                return;
+            }
+
+            const top = allMatches[currentIndex]; // Get current person
+
+            container.innerHTML = `
+                <div class="card shadow border-0 tinder-card p-4">
+                    <div class="display-1 text-primary fw-bold">${top.score}%</div>
+                    <h5 class="fw-bold mb-0">${top.name}</h5>
+                    <p class="text-muted">${top.yearLevel} • ${top.program}</p>
+                    <hr>
+                    <div class="text-start mb-4">
+                        <small class="text-muted fw-bold">WHY THIS MATCH?</small>
+                        <ul class="small text-secondary mt-1">
+                            ${top.reasons.map(r => `<li>✅ ${r}</li>`).join('')}
+                        </ul>
+                    </div>
+                    <div class="d-flex gap-2">
+                        <button onclick="passUser()" class="btn btn-outline-danger w-50">Pass</button>
+                        <a href="/Messages" class="btn btn-primary w-50">Connect</a>
+                    </div>
+                </div>
+                <div class="mt-3 text-muted small">Showing Match #${currentIndex + 1}</div>
+            `;
+        }
+
+        // 2. The Logic for the "Pass" Button
+        window.passUser = () => {
+            currentIndex++; // Move to the next person in the array
+            renderCard();   // Re-draw the screen
+        }
+    </script>
+</body>
+</html>

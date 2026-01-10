@@ -1,0 +1,47 @@
+﻿@{ Layout = null; }
+<button onclick="generateData()" style="padding: 20px; font-size: 20px;">🤖 Generate 10 Dummy Users</button>
+
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-app.js";
+    import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-firestore.js";
+
+    const firebaseConfig = { 
+        apiKey: "AIzaSyDrkRtgGhFWSvEiDr5pZy2sGDHI8HCpPt0",
+        authDomain: "cramrades.firebaseapp.com",
+        projectId: "cramrades",
+        storageBucket: "cramrades.firebasestorage.app",
+        messagingSenderId: "421414498264",
+        appId: "1:421414498264:web:58e04c186d5bdea7c88cad"
+    };
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+
+    const names = ["Alice", "Bob", "Charlie", "Diana", "Ethan", "Fiona", "George", "Hannah", "Ian", "Jenny"];
+    const subjects = ["Math", "Programming", "Science", "History"];
+    const levels = ["Beginner", "Intermediate", "Advanced"];
+    const years = ["1st Year", "2nd Year", "3rd Year", "4th Year"];
+    const days = ["Mon", "Tue", "Wed", "Thu", "Fri"];
+
+    window.generateData = async () => {
+        for (let i = 0; i < 10; i++) {
+            // Randomly pick attributes
+            const randSubj = subjects[Math.floor(Math.random() * subjects.length)];
+            const randLevel = levels[Math.floor(Math.random() * levels.length)];
+            const randYear = years[Math.floor(Math.random() * years.length)];
+            
+            // Random Availability (e.g., ["Mon", "Wed"])
+            const randDays = days.filter(() => Math.random() > 0.5); 
+            if(randDays.length === 0) randDays.push("Mon");
+
+            await addDoc(collection(db, "users"), {
+                name: names[i],
+                program: "BSIT",
+                yearLevel: randYear,
+                availability: randDays, // Array of days
+                skills: [{ subject: randSubj, level: randLevel }], // The CS Data
+                uid: "dummy_" + i // Fake ID
+            });
+        }
+        alert("✅ 10 Dummy Users Added to Firestore!");
+    }
+</script>

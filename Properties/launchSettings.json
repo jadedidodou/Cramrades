@@ -7,9 +7,11 @@
       "launchBrowser": true,
       "applicationUrl": "http://localhost:5197",
       "environmentVariables": {
-        "ASPNETCORE_ENVIRONMENT": "Development"
+        "ASPNETCORE_ENVIRONMENT": "Development",
+      "GOOGLE_APPLICATION_CREDENTIALS": "C:\\Users\\maria angeline\\Desktop\\adet\\credentials_adet.json"
       }
     },
+  
     "https": {
       "commandName": "Project",
       "dotnetRunMessages": true,

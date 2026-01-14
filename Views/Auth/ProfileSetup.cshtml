@@ -4,48 +4,108 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <title>Setup Profile</title>
+    <title>Setup Profile | Cramrades</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        .vibe-card { cursor: pointer; transition: 0.3s; }
+        .btn-check:checked + .vibe-label { background-color: #0d6efd; color: white; border-color: #0d6efd; }
+    </style>
 </head>
 <body class="bg-light py-5">
 
     <div class="container" style="max-width: 600px;">
-        <div class="card shadow border-0">
+        <div class="card shadow border-0 rounded-4">
             <div class="card-body p-5">
-                <h2 class="fw-bold text-primary mb-4">Build Your Academic Profile 🎓</h2>
-                <p class="text-muted">This data powers our matching algorithm.</p>
+                <h2 class="fw-bold text-primary mb-2">Build Your Academic Profile 🎓</h2>
+                <p class="text-muted mb-4">Let's find your perfect study match.</p>
 
-                <label class="fw-bold mt-3">Year Level</label>
-                <select id="yearLevel" class="form-select mb-3">
-                    <option>1st Year</option>
-                    <option>2nd Year</option>
-                    <option>3rd Year</option>
-                    <option>4th Year</option>
-                </select>
-
-                <label class="fw-bold">Availability (Days)</label>
-                <div class="d-flex gap-2 flex-wrap mb-3">
-                    <input type="checkbox" class="btn-check day-check" id="Mon" value="Mon" autocomplete="off">
-                    <label class="btn btn-outline-primary btn-sm" for="Mon">Mon</label>
-
-                    <input type="checkbox" class="btn-check day-check" id="Tue" value="Tue" autocomplete="off">
-                    <label class="btn btn-outline-primary btn-sm" for="Tue">Tue</label>
-
-                    <input type="checkbox" class="btn-check day-check" id="Wed" value="Wed" autocomplete="off">
-                    <label class="btn btn-outline-primary btn-sm" for="Wed">Wed</label>
-
-                    <input type="checkbox" class="btn-check day-check" id="Thu" value="Thu" autocomplete="off">
-                    <label class="btn btn-outline-primary btn-sm" for="Thu">Thu</label>
-
-                    <input type="checkbox" class="btn-check day-check" id="Fri" value="Fri" autocomplete="off">
-                    <label class="btn btn-outline-primary btn-sm" for="Fri">Fri</label>
+                <div class="mb-4">
+                    <label class="fw-bold mb-2">Year Level</label>
+                    <select id="yearLevel" class="form-select">
+                        <option>1st Year</option>
+                        <option>2nd Year</option>
+                        <option>3rd Year</option>
+                        <option>4th Year</option>
+                    </select>
                 </div>
 
-                <label class="fw-bold">Subjects & Skill Level</label>
-                <div id="skills-container"></div>
-                <button onclick="addSkillRow()" class="btn btn-outline-secondary btn-sm w-100 mb-4">+ Add Subject</button>
+                <div class="mb-4">
+                     <label class="fw-bold mb-2">Location (Region in the Philippines)</label>
+                      <select id="location" class="form-select">
+                          <option value="Region I">Region I – Ilocos Region</option>
+                          <option value="Region II">Region II – Cagayan Valley</option>
+                          <option value="Region III">Region III – Central Luzon</option>
+                          <option value="NCR">NCR – National Capital Region</option>
+                          <option value="CAR">CAR – Cordillera Administrative Region</option>
+                          <option value="Region IV-A">Region IV-A – CALABARZON</option>
+                          <option value="MIMAROPA">MIMAROPA Region</option>
+                          <option value="Region V">Region V – Bicol Region</option>
+                          <option value="Region VI">Region VI – Western Visayas</option>
+                          <option value="Region VII">Region VII – Central Visayas</option>
+                          <option value="Region VIII">Region VIII – Eastern Visayas</option>
+                          <option value="Region IX">Region IX – Zamboanga Peninsula</option>
+                          <option value="Region X">Region X – Northern Mindanao</option>
+                          <option value="Region XI">Region XI – Davao Region</option>
+                          <option value="Region XII">Region XII – SOCCSKSARGEN</option>
+                          <option value="Region XIII">Region XIII – Caraga</option>
+                          <option value="BARMM">BARMM – Bangsamoro Autonomous Region in Muslim Mindanao</option>
+                       </select>
+                     </div>
 
-                <button onclick="saveProfile()" class="btn btn-success w-100 btn-lg">Finish & Discover 🚀</button>
+                <div class="row mb-4">
+                    <div class="col-6">
+                        <label class="fw-bold mb-2">My Gender</label>
+                        <select id="myGender" class="form-select">
+                            <option value="Male">Male</option>
+                            <option value="Female">Female</option>
+                            <option value="Non-binary">Non-binary</option>
+                        </select>
+                    </div>
+                    <div class="col-6">
+                        <label class="fw-bold mb-2">Show Me (Preference)</label>
+                        <select id="genderPreference" class="form-select">
+                            <option value="Everyone">Everyone</option>
+                            <option value="Male">Males</option>
+                            <option value="Female">Females</option>
+                        </select>
+                    </div>
+                </div>
+
+                <label class="fw-bold mb-2">Study Vibe (Choose your environment)</label>
+                <div class="d-flex gap-2 mb-4">
+                    <input type="radio" class="btn-check" name="studyVibe" id="vibeQuiet" value="Quiet" checked>
+                    <label class="btn btn-outline-primary rounded-pill vibe-label" for="vibeQuiet">🤫 Silent</label>
+
+                    <input type="radio" class="btn-check" name="studyVibe" id="vibeCoffee" value="Coffee">
+                    <label class="btn btn-outline-primary rounded-pill vibe-label" for="vibeCoffee">☕ Coffee Shop</label>
+
+                    <input type="radio" class="btn-check" name="studyVibe" id="vibeGroup" value="Group">
+                    <label class="btn btn-outline-primary rounded-pill vibe-label" for="vibeGroup">🗣️ Collaborative</label>
+                </div>
+
+                <div class="mb-4">
+                    <label class="fw-bold mb-2">About Me</label>
+                    <textarea id="bio" class="form-control" rows="2" placeholder="Tell us a little about your study habits..."></textarea>
+                </div>
+
+                <div class="mb-4">
+                    <label class="fw-bold mb-2">Prompt: I'm looking for a partner who...</label>
+                    <input type="text" id="partnerPrompt" class="form-control" placeholder="e.g. Can explain code logic like I'm five">
+                </div>
+
+                <label class="fw-bold mb-2">Availability (Days)</label>
+                <div class="d-flex gap-2 flex-wrap mb-4">
+                    @foreach(var day in new[] {"Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"}) {
+                        <input type="checkbox" class="btn-check day-check" id="@day" value="@day" autocomplete="off">
+                        <label class="btn btn-outline-secondary btn-sm rounded-pill" for="@day">@day</label>
+                    }
+                </div>
+
+                <label class="fw-bold mb-2">Subjects & Skill Level</label>
+                <div id="skills-container"></div>
+                <button onclick="addSkillRow()" class="btn btn-light btn-sm w-100 mb-4 border">+ Add Subject</button>
+
+                <button type="button" onclick="saveProfile()" class="btn btn-primary w-100 btn-lg rounded-pill shadow">Finish & Discover 🚀</button>
             </div>
         </div>
     </div>
@@ -66,27 +126,49 @@
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
 
-        // Add Row Logic
+        // UI Function to add more rows
         window.addSkillRow = () => {
             const div = document.createElement("div");
             div.className = "input-group mb-2 skill-row";
             div.innerHTML = `
-                <select class="form-select subject"><option>Math</option><option>Programming</option><option>Science</option></select>
-                <select class="form-select level"><option>Beginner</option><option>Intermediate</option><option>Advanced</option></select>
+                <select class="form-select subject">
+                    <option>Mathematics</option>
+                    <option>Programming</option>
+                    <option>Science</option>
+                    <option>Literature</option>
+                </select>
+                <select class="form-select level">
+                    <option>Beginner</option>
+                    <option>Intermediate</option>
+                    <option>Advanced</option>
+                </select>
             `;
             document.getElementById("skills-container").appendChild(div);
         }
-        addSkillRow(); // Add default
+        addSkillRow(); 
 
+        // Main Save Function
         window.saveProfile = async () => {
-            const uid = localStorage.getItem("tempUid");
-            const name = localStorage.getItem("tempName");
 
-            // Collect Availability
+            if (event) event.preventDefault(); // This stops the page from reloading
+    
+    // ... rest of your code ...
+    
+    try {
+        console.log("Saving...");
+        await setDoc(...); 
+        console.log("Redirecting now...");
+        window.location.href = "/Auth/CompleteRegistration"; // This is the redirect
+    } catch (error) {
+        console.error(error);
+    }
+            const selectedVibe = document.querySelector('input[name="studyVibe"]:checked');
+            const uid = localStorage.getItem("tempUid") || "test_user_123";
+            const name = localStorage.getItem("tempName") || "Anonymous Student";
+
             let days = [];
             document.querySelectorAll(".day-check:checked").forEach(c => days.push(c.value));
 
-            // Collect Skills
             let skills = [];
             document.querySelectorAll(".skill-row").forEach(row => {
                 skills.push({
@@ -95,16 +177,34 @@
                 });
             });
 
-            // SAVE TO FIREBASE
-            await setDoc(doc(db, "users", uid), {
-                name: name,
-                yearLevel: document.getElementById("yearLevel").value,
-                availability: days,
-                skills: skills,
-                uid: uid
-            });
+            try {
+                console.log("Saving to Firestore...");
+                
+                // 1. Send data to Firebase
+                await setDoc(doc(db, "users", uid), {
+                    uid: uid,
+                    name: name,
+                    yearLevel: document.getElementById("yearLevel").value,
+                    location: document.getElementById("location").value,
+                    gender: document.getElementById("myGender").value,
+                    preference: document.getElementById("genderPreference").value,
+                    studyVibe: selectedVibe ? selectedVibe.value : "Quiet",
+                    bio: document.getElementById("bio").value,
+                    partnerPrompt: document.getElementById("partnerPrompt").value,
+                    availability: days,
+                    skills: skills,
+                    createdAt: new Date()
+                });
 
-            window.location.href = "/Discover";
+                console.log("Save Success!");
+                
+                // 2. Client-side redirect to the AuthController method
+                window.location.href = "/Auth/CompleteRegistration"; 
+
+            } catch (error) {
+                console.error("Error saving profile:", error);
+                alert("Failed to save profile: " + error.message);
+            }
         }
     </script>
 </body>

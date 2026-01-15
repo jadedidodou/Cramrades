@@ -226,6 +226,42 @@
         </div>
     </div>
 
+    <div class="modal fade" id="successModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered modal-sm">
+            <div class="modal-content rounded-4 border-0 shadow-lg">
+                <div class="modal-body p-4 text-center">
+                    <div class="mb-3">
+                        <div class="bg-success-subtle text-success rounded-circle d-inline-flex align-items-center justify-content-center" style="width: 60px; height: 60px;">
+                            <i class="bi bi-check-lg fs-3"></i>
+                        </div>
+                    </div>
+                    <h5 class="fw-bold mb-2">Profile Updated!</h5>
+                    <p class="text-muted small mb-4">Your changes have been saved successfully.</p>
+                    <button onclick="window.location.href='/Home/Index'" class="btn btn-success rounded-pill w-100 fw-bold">Continue to Dashboard</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="errorModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered modal-sm">
+            <div class="modal-content rounded-4 border-0 shadow-lg">
+                <div class="modal-body p-4 text-center">
+                    <div class="mb-3">
+                        <div class="bg-danger-subtle text-danger rounded-circle d-inline-flex align-items-center justify-content-center" style="width: 50px; height: 50px;">
+                            <i class="bi bi-exclamation-triangle-fill fs-4"></i>
+                        </div>
+                    </div>
+                    <h5 class="fw-bold text-danger mb-2">Oops!</h5>
+                    <p class="text-muted small mb-3" id="error-msg">Something went wrong.</p>
+                    <button type="button" class="btn btn-light rounded-pill w-100 fw-bold" data-bs-dismiss="modal">Okay</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-app.js";
         import { getAuth, signOut } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-auth.js";
@@ -249,7 +285,12 @@
         window.handleImageUpload = (event) => {
             const file = event.target.files[0];
             if (!file) return;
-            if (file.size > 1024 * 1024) { alert("File too large! Max 1MB."); return; }
+
+            if (file.size > 1024 * 1024) {
+                showError("File too large! Max 1MB.");
+                return;
+            }
+
             const reader = new FileReader();
             reader.onload = function(e) {
                 document.getElementById("preview-img").src = e.target.result;
@@ -333,8 +374,15 @@
                 }
             } catch (error) {
                 console.error(error);
-                alert("Error loading profile.");
+                showError("Error loading profile.");
             }
+        }
+
+        // --- HELPER: SHOW ERROR MODAL ---
+        function showError(message) {
+            document.getElementById("error-msg").innerText = message;
+            // Add 'window.' before bootstrap
+            new window.bootstrap.Modal(document.getElementById('errorModal')).show();
         }
 
         window.saveChanges = async () => {
@@ -342,8 +390,9 @@
             const uid = localStorage.getItem("tempUid");
 
             const newName = document.getElementById("fullName").value.trim();
-            if(!newName) return alert("Please enter your full name!");
+            if(!newName) return showError("Please enter your full name!");
 
+            // ... (Your existing loops for days and skills remain here) ...
             let simpleDays = [];
             let detailedAvailability = [];
             const days = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
@@ -383,9 +432,7 @@
                     availability: simpleDays,
                     availabilityDetails: detailedAvailability,
                     skills: skills,
-                    // --- CRITICAL FIX FOR LOOP ---
-                    profileCompleted: true,
-                    // -----------------------------
+                    profileCompleted: true, // Loop Fix
                     updatedAt: new Date().toISOString()
                 };
 
@@ -396,20 +443,20 @@
                 await updateDoc(doc(db, "users", uid), dataToSave);
                 localStorage.setItem("tempName", newName);
 
-                alert("✅ Profile Updated!");
-                window.location.href = "/Home/Index";
+                const successModal = new window.bootstrap.Modal(document.getElementById('successModal'));
+                successModal.show();
+                // Note: Redirect happens when they click the button in the modal
+
             } catch (error) {
                 console.error(error);
-                alert("Error saving: " + error.message);
+                showError("Error saving: " + error.message);
                 btn.innerHTML = "💾 Save Changes"; btn.disabled = false;
             }
         }
 
         // Handle Cancel (if they want to log out instead of setting up)
         window.handleCancel = async () => {
-             await signOut(auth);
-             localStorage.clear();
-             window.location.href = "/Auth/Login";
+             window.location.href = "/Home/Index";
         }
 
         loadData();

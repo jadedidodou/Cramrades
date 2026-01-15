@@ -6,6 +6,7 @@
 <head>
     <title>Setup Profile | Cramrades</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
     <style>
         .vibe-card {
             cursor: pointer;
@@ -36,7 +37,6 @@
             }
         }
 
-        /* PROFILE PIC STYLES */
         .profile-pic-container {
             position: relative;
             width: 120px;
@@ -75,12 +75,17 @@
         <div class="card shadow border-0 rounded-4">
             <div class="card-body p-5">
                 <h2 class="fw-bold text-primary mb-2 text-center">Build Your Profile 📸</h2>
-                <p class="text-muted mb-4 text-center">Add a photo so others can recognize you.</p>
+                <p class="text-muted mb-4 text-center">Introduce yourself to your future study partners.</p>
 
                 <div class="profile-pic-container mb-4">
                     <img src="https://ui-avatars.com/api/?name=User&background=random" id="preview-img" class="profile-pic shadow-sm">
                     <label for="file-upload" class="upload-btn shadow-sm">📷</label>
                     <input type="file" id="file-upload" accept="image/*" style="display: none;" onchange="handleImageUpload(event)">
+                </div>
+
+                <div class="mb-4">
+                    <label class="fw-bold mb-2">Full Name</label>
+                    <input type="text" id="fullName" class="form-control form-control-lg" placeholder="e.g. Juan Dela Cruz">
                 </div>
 
                 <div class="row mb-4">
@@ -163,10 +168,8 @@
                     <div class="d-flex gap-2">
                         <input type="radio" class="btn-check" name="studyVibe" id="vibeQuiet" value="Quiet" checked>
                         <label class="btn btn-outline-primary rounded-pill vibe-label" for="vibeQuiet">🤫 Silent</label>
-
                         <input type="radio" class="btn-check" name="studyVibe" id="vibeCoffee" value="Coffee">
                         <label class="btn btn-outline-primary rounded-pill vibe-label" for="vibeCoffee">☕ Coffee Shop</label>
-
                         <input type="radio" class="btn-check" name="studyVibe" id="vibeGroup" value="Group">
                         <label class="btn btn-outline-primary rounded-pill vibe-label" for="vibeGroup">🗣️ Collaborative</label>
                     </div>
@@ -213,9 +216,44 @@
         </div>
     </div>
 
+    <div class="modal fade" id="successModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered modal-sm">
+            <div class="modal-content rounded-4 border-0 shadow-lg">
+                <div class="modal-body p-4 text-center">
+                    <div class="mb-3">
+                        <div class="bg-success-subtle text-success rounded-circle d-inline-flex align-items-center justify-content-center" style="width: 60px; height: 60px;">
+                            <i class="bi bi-rocket-takeoff-fill fs-3"></i>
+                        </div>
+                    </div>
+                    <h5 class="fw-bold mb-2">You're All Set!</h5>
+                    <p class="text-muted small mb-4">Your profile is ready. Let's find you a study partner.</p>
+                    <a href="/Home/Index" class="btn btn-primary rounded-pill w-100 fw-bold">Go to Dashboard 🚀</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="errorModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered modal-sm">
+            <div class="modal-content rounded-4 border-0 shadow-lg">
+                <div class="modal-body p-4 text-center">
+                    <div class="mb-3">
+                        <div class="bg-danger-subtle text-danger rounded-circle d-inline-flex align-items-center justify-content-center" style="width: 50px; height: 50px;">
+                            <i class="bi bi-exclamation-triangle-fill fs-4"></i>
+                        </div>
+                    </div>
+                    <h5 class="fw-bold text-danger mb-2">Oops!</h5>
+                    <p class="text-muted small mb-3" id="error-msg">Something went wrong.</p>
+                    <button type="button" class="btn btn-light rounded-pill w-100 fw-bold" data-bs-dismiss="modal">Try Again</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-app.js";
-        import { getFirestore, doc, updateDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-firestore.js";
+        import { getFirestore, doc, updateDoc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyDrkRtgGhFWSvEiDr5pZy2sGDHI8HCpPt0",
@@ -228,89 +266,63 @@
 
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
-
-        // GLOBAL VARIABLE to hold the image data
         let currentPhotoBase64 = "";
 
-        // 1. IMAGE HANDLER
+        function showError(message) {
+            document.getElementById("error-msg").innerText = message;
+            new bootstrap.Modal(document.getElementById('errorModal')).show();
+        }
+
         window.handleImageUpload = (event) => {
             const file = event.target.files[0];
             if (!file) return;
-
-            // Size Check (Max 1MB)
-            if (file.size > 1024 * 1024) {
-                alert("File too large! Please upload an image smaller than 1MB.");
-                return;
-            }
-
+            if (file.size > 1024 * 1024) { showError("File too large! Max 1MB."); return; }
             const reader = new FileReader();
-            reader.onload = function(e) {
-                // Update Preview
+            reader.onload = (e) => {
                 document.getElementById("preview-img").src = e.target.result;
-                // Save Data
                 currentPhotoBase64 = e.target.result;
             };
             reader.readAsDataURL(file);
         }
 
-        // 2. TOGGLE TIME VISIBILITY
         window.toggleTime = (day) => {
             const checkbox = document.getElementById("check-" + day);
-            const timeBox = document.getElementById("time-" + day);
-            if(checkbox.checked) timeBox.style.display = "block";
-            else timeBox.style.display = "none";
+            document.getElementById("time-" + day).style.display = checkbox.checked ? "block" : "none";
         }
 
-        // 3. SKILLS LIST
-        window.addSkillRow = () => {
+        window.addSkillRow = (subject = "", level = "") => {
             const div = document.createElement("div");
             div.className = "input-group mb-2 skill-row";
             div.innerHTML = `
                 <select class="form-select subject">
-                    <optgroup label="General">
-                        <option>Mathematics</option>
-                        <option>Science</option>
-                        <option>English / Literature</option>
-                        <option>History / Rizal</option>
-                        <option>Filipino</option>
-                    </optgroup>
-                    <optgroup label="Technology">
-                        <option>Programming</option>
-                        <option>Web Development</option>
-                        <option>Data Structures</option>
-                        <option>Database</option>
-                        <option>Networking</option>
-                    </optgroup>
-                    <optgroup label="Business">
-                        <option>Accounting</option>
-                        <option>Economics</option>
-                        <option>Marketing</option>
-                    </optgroup>
+                    <optgroup label="General"><option>Mathematics</option><option>Science</option><option>English / Literature</option><option>History / Rizal</option><option>Filipino</option></optgroup>
+                    <optgroup label="Technology"><option>Programming</option><option>Web Development</option><option>Data Structures</option><option>Database</option><option>Networking</option></optgroup>
+                    <optgroup label="Business"><option>Accounting</option><option>Economics</option><option>Marketing</option></optgroup>
                 </select>
                 <select class="form-select level"><option>Beginner</option><option>Intermediate</option><option>Advanced</option></select>
-            `;
+                <button class="btn btn-outline-danger" onclick="this.parentElement.remove()">X</button>`;
             document.getElementById("skills-container").appendChild(div);
+            if(subject) div.querySelector(".subject").value = subject;
+            if(level) div.querySelector(".level").value = level;
         }
-        addSkillRow();
+        addSkillRow(); // Start with one row
 
-        // 4. SAVE PROFILE
         window.saveProfile = async () => {
-            if (event) event.preventDefault();
-            const btn = document.querySelector("button[onclick='saveProfile()']");
             const uid = localStorage.getItem("tempUid");
+            const newName = document.getElementById("fullName").value.trim();
+            if (!uid) { showError("Session expired. Please Sign In again."); return; }
+            if (!newName) { showError("Please enter your full name!"); return; }
 
-            if (!uid) { alert("Session expired. Sign Up again."); window.location.href = "/Auth/SignUp"; return; }
+            const btn = document.querySelector("button[onclick='saveProfile()']");
 
             // Collect Availability
             let simpleDays = [];
             let detailedAvailability = [];
-            const days = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
-            days.forEach(day => {
-                const checkbox = document.getElementById("check-" + day);
-                if(checkbox.checked) {
+            ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"].forEach(day => {
+                if(document.getElementById("check-" + day).checked) {
                     simpleDays.push(day);
                     detailedAvailability.push({
-                        day,
+                        day: day,
                         startTime: document.getElementById("start-" + day).value || "Anytime",
                         endTime: document.getElementById("end-" + day).value || "Anytime"
                     });
@@ -325,8 +337,8 @@
 
             try {
                 btn.innerHTML = "Saving..."; btn.disabled = true;
-
                 const dataToSave = {
+                    name: newName,
                     program: document.getElementById("program").value,
                     yearLevel: document.getElementById("yearLevel").value,
                     location: document.getElementById("location").value,
@@ -338,27 +350,59 @@
                     availability: simpleDays,
                     availabilityDetails: detailedAvailability,
                     skills: skills,
-                    isSetupComplete: true,
+                    profileCompleted: true, // Fix for the login loop
                     updatedAt: new Date().toISOString()
                 };
 
-                // ONLY SAVE PHOTO IF UPLOADED
-                if (currentPhotoBase64) {
-                    dataToSave.photoURL = currentPhotoBase64;
-                }
+                if (currentPhotoBase64) dataToSave.photoURL = currentPhotoBase64;
 
-                try { await updateDoc(doc(db, "users", uid), dataToSave); }
-                catch (e) { await setDoc(doc(db, "users", uid), dataToSave, { merge: true }); }
-
-                alert("✅ Profile Setup Complete!");
-                window.location.href = "/Home/Index";
+                await updateDoc(doc(db, "users", uid), dataToSave);
+                new bootstrap.Modal(document.getElementById('successModal')).show();
 
             } catch (error) {
                 console.error(error);
-                alert("Save failed: " + error.message);
+                showError("Save failed: " + error.message);
                 btn.innerHTML = "Finish & Discover 🚀"; btn.disabled = false;
             }
         }
+
+        // --- IMPROVED LOAD INITIAL DATA ---
+        async function loadInitialData() {
+            const uid = localStorage.getItem("tempUid");
+            if (!uid) {
+                console.warn("No UID found in localStorage");
+                return;
+            }
+
+            try {
+                // We need to import getDoc if it's not already in your list
+                // Since it's missing from your current imports, I'll use the full path
+                const docSnap = await getDoc(doc(db, "users", uid));
+
+                if (docSnap.exists()) {
+                    const data = docSnap.data();
+
+                    if (data.name) {
+                        // 1. Fill the input field
+                        const nameField = document.getElementById("fullName");
+                        if (nameField) nameField.value = data.name;
+
+                        // 2. Update the avatar with their actual name initials
+                        const previewImg = document.getElementById("preview-img");
+                        if (previewImg) {
+                            previewImg.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(data.name)}&background=random`;
+                        }
+                    }
+                }
+            } catch (error) {
+                console.error("Error fetching initial name:", error);
+            }
+        }
+
+        // --- REPLACE THE OLD CALL WITH THIS ---
+        // This waits for the HTML to be fully loaded before running the data fetch
+        document.addEventListener("DOMContentLoaded", loadInitialData);
+
     </script>
 </body>
 </html>

@@ -151,7 +151,7 @@
             <div class="mb-3" style="font-size: 50px;">😴</div>
             <h4>No high matches found!</h4>
             <p class="text-muted" style="max-width: 300px; margin: 0 auto;">
-                We only show students with <strong>>60% compatibility</strong>. Try updating your profile to match with more people.
+                We only show students with <strong>50%+ compatibility</strong>. Try updating your profile to match with more people.
             </p>
             <a href="/Home/Index" class="btn btn-primary rounded-pill mt-3">Go Home</a>
         </div>
@@ -188,6 +188,7 @@
     </div>
 
     <script type="module">
+        // 1. IMPORT EVERYTHING PROPERLY
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-app.js";
         import { getFirestore, collection, getDocs, doc, getDoc, setDoc, query, where } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-firestore.js";
 
@@ -202,57 +203,68 @@
 
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
-        const myUid = localStorage.getItem("tempUid");
 
+        // GLOBAL VARIABLES
+        const myUid = localStorage.getItem("tempUid"); // Only declare once here!
         let matches = [];
         let currentIndex = 0;
         let myProfile = {};
-
-        // --- CONSTANT FOR THRESHOLD ---
         const MIN_SCORE_THRESHOLD = 50;
 
         async function initDiscover() {
-            if(!myUid) return window.location.href = "/Auth/Login";
+            console.log("Checking session for UID:", myUid);
+            if(!myUid) {
+                window.location.href = "/Auth/Login";
+                return;
+            }
 
             try {
-                // 1. Get My Profile
+                // STEP A: Get My Profile
                 const mySnap = await getDoc(doc(db, "users", myUid));
-                if(mySnap.exists()) myProfile = mySnap.data();
+                if(mySnap.exists()) {
+                    myProfile = mySnap.data();
+                } else {
+                    console.error("My profile not found in DB!");
+                }
 
-                // 2. Get Ignore List (People I already chat with)
+                // STEP B: Build Ignore List (Matches + Myself)
+                const ignoredIds = new Set();
+                ignoredIds.add(myUid); // <--- SELF-MATCH FIX
+
                 const qChats = query(collection(db, "chats"), where("participants", "array-contains", myUid));
                 const chatSnaps = await getDocs(qChats);
-                const ignoredIds = new Set();
-                ignoredIds.add(myUid);
                 chatSnaps.forEach(chatDoc => {
                     const data = chatDoc.data();
-                    if(data.participants) data.participants.forEach(p => ignoredIds.add(p));
+                    if(data.participants) {
+                        data.participants.forEach(p => ignoredIds.add(p));
+                    }
                 });
 
-                // 3. Get Users & Filter
+                // STEP C: Get All Users & Filter
                 const querySnapshot = await getDocs(collection(db, "users"));
                 let tempUsers = [];
 
-                querySnapshot.forEach((doc) => {
-                    const user = doc.data();
+                querySnapshot.forEach((userDoc) => {
+                    const user = userDoc.data();
+                    const otherUid = userDoc.id; // Use Doc ID as UID
 
-                    // Filter 1: Must not be me or someone I know
-                    if (!ignoredIds.has(user.uid)) {
-
+                    // FIX: Must not be me AND must have profile completed
+                    if (otherUid !== myUid && !ignoredIds.has(otherUid) && user.profileCompleted === true) {
                         const result = calculateCompatibility(user, myProfile);
                         user.score = result.score;
                         user.reasons = result.reasons;
+                        user.uid = otherUid;
 
-                        // Filter 2: SCORE MUST BE ABOVE 60%
-                        if (user.score > MIN_SCORE_THRESHOLD) {
+                        if (user.score >= MIN_SCORE_THRESHOLD) {
                             tempUsers.push(user);
                         }
                     }
                 });
 
+                // STEP D: Update UI
                 matches = tempUsers.sort((a, b) => b.score - a.score);
-
                 document.getElementById("loading").style.display = "none";
+
                 if (matches.length > 0) {
                     document.getElementById("card-container").style.display = "block";
                     renderCard(matches[0]);
@@ -261,11 +273,12 @@
                 }
 
             } catch (error) {
-                console.error("Error:", error);
-                alert("Failed to load matches.");
+                console.error("Discovery error:", error);
+                document.getElementById("loading").innerHTML = `<p class="text-danger">Error loading matches. Check F12 console.</p>`;
             }
         }
 
+        // --- COMPATIBILITY LOGIC ---
         function calculateCompatibility(them, me) {
             let score = 0;
             let reasons = [];
@@ -273,59 +286,37 @@
             if (them.program === me.program) { score += 20; reasons.push(`📚 Both in ${me.program}`); }
             if (them.studyVibe === me.studyVibe) { score += 20; reasons.push(`✨ Both like ${me.studyVibe} Vibe`); }
 
-            if (me.skills && them.skills && Array.isArray(me.skills) && Array.isArray(them.skills)) {
-                const mySubjects = me.skills.map(s => s.subject);
-                const theirSubjects = them.skills.map(s => s.subject);
-                const commonSubjects = mySubjects.filter(sub => theirSubjects.includes(sub));
-
-                if (commonSubjects.length > 0) {
-                    score += (commonSubjects.length * 10);
-                    reasons.push(`🧠 Both studying ${commonSubjects[0]}`);
-                    if(commonSubjects.length > 1) { reasons.push(`🧠 And ${commonSubjects.length - 1} other shared subjects`); }
+            // Subject Matching
+            if (me.skills && them.skills) {
+                const mySubs = me.skills.map(s => s.subject);
+                const theirSubs = them.skills.map(s => s.subject);
+                const common = mySubs.filter(s => theirSubs.includes(s));
+                if (common.length > 0) {
+                    score += (common.length * 10);
+                    reasons.push(`🧠 Both studying ${common[0]}`);
                 }
             }
 
             if (them.location === me.location) { score += 10; reasons.push(`📍 Both from ${me.location}`); }
 
-            if (me.availability && them.availability) {
-                const commonDays = me.availability.filter(day => them.availability.includes(day));
-                if (commonDays.length > 0) {
-                    score += 15;
-                    const matchDay = commonDays[0];
-                    let timeReason = `📅 Both free on ${matchDay}`;
-                    if (me.availabilityDetails && them.availabilityDetails) {
-                        const mySlot = me.availabilityDetails.find(d => d.day === matchDay);
-                        if(mySlot && mySlot.startTime && mySlot.startTime !== "Anytime") {
-                            timeReason += ` around ${mySlot.startTime}`;
-                        }
-                    }
-                    reasons.push(timeReason);
-                }
-            }
+            // Preference Logic
+            if (me.preference !== "Everyone" && me.preference !== them.gender) score -= 100;
 
-            if (me.preference !== "Everyone" && me.preference !== them.gender) score -= 50;
-            if (score > 100) score = 100;
-            if (score < 0) score = 0;
-
-            if (reasons.length === 0 && score > 0) reasons.push("🌱 Potential Match");
-            if (reasons.length === 0) reasons.push("👋 New Student");
-
-            return { score, reasons };
+            return { score: Math.min(100, Math.max(0, score)), reasons };
         }
 
         function renderCard(user) {
             document.getElementById("card-name").innerText = user.name || "Student";
             document.getElementById("card-course").innerText = (user.program || "Course") + " • " + (user.yearLevel || "Year");
-            const bio = user.bio || "No bio yet.";
-            document.getElementById("card-bio").innerText = bio.length > 100 ? bio.substring(0, 100) + "..." : bio;
+            document.getElementById("card-bio").innerText = user.bio || "No bio yet.";
             document.getElementById("score-display").innerText = user.score + "%";
+
             const imgEl = document.getElementById("card-img");
-            imgEl.src = user.photoURL || `https://ui-avatars.com/api/?name=${user.name || "User"}&background=random&size=400`;
+            imgEl.src = user.photoURL || `https://ui-avatars.com/api/?name=${encodeURIComponent(user.name || 'User')}&background=random&size=400`;
 
             const reasonsDiv = document.getElementById("reasons-container");
             reasonsDiv.innerHTML = "";
-            const topReasons = user.reasons.slice(0, 4);
-            topReasons.forEach(r => {
+            user.reasons.slice(0, 4).forEach(r => {
                 reasonsDiv.innerHTML += `<div class="match-reason-item"><i class="bi bi-check-circle-fill"></i> ${r}</div>`;
             });
         }
@@ -335,7 +326,12 @@
             card.classList.add("fade-out-left");
             setTimeout(() => {
                 card.classList.remove("fade-out-left");
-                nextCard();
+                currentIndex++;
+                if (currentIndex < matches.length) renderCard(matches[currentIndex]);
+                else {
+                    document.getElementById("card-container").style.display = "none";
+                    document.getElementById("no-matches").style.display = "block";
+                }
             }, 300);
         }
 
@@ -345,33 +341,21 @@
             btn.innerHTML = `<span class="spinner-border spinner-border-sm"></span>`;
 
             const partnerName = user.name || "Student";
-            const myName = myProfile.name || "Me";
             const chatId = [myUid, user.uid].sort().join("_");
 
             try {
                 await setDoc(doc(db, "chats", chatId), {
                     participants: [myUid, user.uid],
-                    participantNames: { [myUid]: myName, [user.uid]: partnerName },
-                    participantVibes: { [myUid]: myProfile.studyVibe, [user.uid]: user.studyVibe },
+                    participantNames: { [myUid]: myProfile.name || "Me", [user.uid]: partnerName },
                     lastMessage: "Started a new connection! 👋",
                     lastMessageTime: new Date().toISOString()
                 }, { merge: true });
 
-                window.location.href = `/Home/Messages?chatId=${chatId}&name=${partnerName}&vibe=${user.studyVibe}`;
+                window.location.href = `/Home/Messages?chatId=${chatId}&name=${encodeURIComponent(partnerName)}`;
             } catch (e) {
                 console.error(e);
                 alert("Connection failed.");
                 btn.innerHTML = `<i class="bi bi-chat-heart-fill"></i>`;
-            }
-        }
-
-        function nextCard() {
-            currentIndex++;
-            if (currentIndex < matches.length) {
-                renderCard(matches[currentIndex]);
-            } else {
-                document.getElementById("card-container").style.display = "none";
-                document.getElementById("no-matches").style.display = "block";
             }
         }
 

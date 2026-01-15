@@ -83,6 +83,9 @@
                     <span class="input-group-text bg-light border-end-0 rounded-start-3"><i class="bi bi-lock text-muted"></i></span>
                     <input type="password" id="password" class="form-control border-start-0 rounded-end-3" placeholder="••••••••">
                 </div>
+                <div class="text-end mt-1">
+                    <a href="javascript:void(0)" onclick="openResetModal()" class="text-decoration-none small fw-bold">Forgot Password?</a>
+                </div>
             </div>
 
             <button onclick="handleLogin()" class="btn btn-primary w-100 shadow-sm" id="loginBtn">Sign In</button>
@@ -104,10 +107,46 @@
         </div>
     </div>
 
+    <div class="modal fade" id="resetModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered modal-sm">
+            <div class="modal-content rounded-4 border-0 shadow-lg">
+                <div class="modal-body p-4 text-center">
+                    <div class="mb-3">
+                        <div class="bg-primary-subtle text-primary rounded-circle d-inline-flex align-items-center justify-content-center" style="width: 50px; height: 50px;">
+                            <i class="bi bi-key-fill fs-4"></i>
+                        </div>
+                    </div>
+                    <h5 class="fw-bold mb-2">Reset Password</h5>
+                    <p class="text-muted small mb-3">Enter your email and we'll send you a reset link.</p>
+                    <input type="email" id="resetEmail" class="form-control mb-3" placeholder="name@example.com">
+                    <button type="button" class="btn btn-primary rounded-pill w-100 fw-bold mb-2" onclick="handlePasswordReset()">Send Link</button>
+                    <button type="button" class="btn btn-light rounded-pill w-100 fw-bold" data-bs-dismiss="modal">Cancel</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="successModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered modal-sm">
+            <div class="modal-content rounded-4 border-0 shadow-lg">
+                <div class="modal-body p-4 text-center">
+                    <div class="mb-3">
+                        <div class="bg-success-subtle text-success rounded-circle d-inline-flex align-items-center justify-content-center" style="width: 50px; height: 50px;">
+                            <i class="bi bi-check-lg fs-4"></i>
+                        </div>
+                    </div>
+                    <h5 class="fw-bold mb-2">Email Sent!</h5>
+                    <p class="text-muted small mb-3">Check your inbox for the reset instructions.</p>
+                    <button type="button" class="btn btn-success rounded-pill w-100 fw-bold" data-bs-dismiss="modal">Got it</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-app.js";
-        import { getAuth, signInWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-auth.js";
+        import { getAuth, signInWithEmailAndPassword, signOut, sendPasswordResetEmail } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-auth.js";
         import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-firestore.js";
 
         const firebaseConfig = { apiKey: "AIzaSyDrkRtgGhFWSvEiDr5pZy2sGDHI8HCpPt0", authDomain: "cramrades.firebaseapp.com", projectId: "cramrades", storageBucket: "cramrades.firebasestorage.app", messagingSenderId: "421414498264", appId: "1:421414498264:web:58e04c186d5bdea7c88cad" };
@@ -148,9 +187,9 @@
                 // --- 3. REDIRECT ---
                 localStorage.setItem("tempUid", user.uid);
                 if (isSetup) {
-                    window.location.href = "/Home/Index"; // Dashboard
+                    window.location.href = "/Home/Index"; // Already has a profile -> Dashboard
                 } else {
-                    window.location.href = "/Auth/ProfileEdit"; // First Time Setup
+                    window.location.href = "/Auth/ProfileSetup"; // New user -> Setup Page
                 }
 
             } catch (error) {
@@ -167,6 +206,34 @@
         function showError(message) {
             document.getElementById("error-msg").innerText = message;
             new bootstrap.Modal(document.getElementById('errorModal')).show();
+        }
+
+                window.openResetModal = () => {
+            new bootstrap.Modal(document.getElementById('resetModal')).show();
+        }
+
+        window.handlePasswordReset = async () => {
+            const email = document.getElementById("resetEmail").value.trim();
+            if (!email) {
+                showError("Please enter your email first.");
+                return;
+            }
+
+            try {
+                await sendPasswordResetEmail(auth, email);
+
+                // Hide Reset Modal
+                const resetEl = document.getElementById('resetModal');
+                bootstrap.Modal.getInstance(resetEl).hide();
+
+                // Show Success Modal
+                new bootstrap.Modal(document.getElementById('successModal')).show();
+            } catch (error) {
+                console.error(error);
+                let msg = "Could not send reset link.";
+                if(error.code === "auth/user-not-found") msg = "No account exists with this email.";
+                showError(msg);
+            }
         }
     </script>
 </body>

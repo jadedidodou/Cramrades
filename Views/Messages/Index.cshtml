@@ -1,65 +1,281 @@
 ﻿@{
     Layout = null;
 }
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <title>Messages</title>
+    <title>Chat | Cramrades</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
     <style>
-        .chat-box {
-            height: 70vh;
-            overflow-y: auto;
-            background: #f8f9fa;
-            border: 1px solid #ddd;
+        body {
+            background-color: #f0f2f5;
+            height: 100vh;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            font-family: 'Segoe UI', sans-serif;
         }
 
-        .attachment {
-            border-left: 4px solid #0d6efd;
-            background: #e7f1ff;
-            padding: 10px;
-            margin-top: 5px;
+        .chat-header {
+            background: white;
+            padding: 10px 20px;
+            border-bottom: 1px solid #ddd;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+            z-index: 10;
         }
+
+        .header-avatar {
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid white;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .chat-container {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            background-color: #f0f2f5;
+        }
+
+        #message-list {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .message-row {
+            display: flex;
+            flex-direction: column;
+            max-width: 75%;
+        }
+
+        .message-bubble {
+            padding: 12px 16px;
+            border-radius: 18px;
+            font-size: 15px;
+            word-wrap: break-word;
+            position: relative;
+        }
+
+        .me {
+            align-self: flex-end;
+            align-items: flex-end;
+        }
+
+            .me .message-bubble {
+                background: #0d6efd;
+                color: white;
+                border-bottom-right-radius: 4px;
+            }
+
+        .them {
+            align-self: flex-start;
+            align-items: flex-start;
+        }
+
+            .them .message-bubble {
+                background: white;
+                color: #333;
+                border: 1px solid #e5e5e5;
+                border-bottom-left-radius: 4px;
+            }
+
+        .meta {
+            font-size: 11px;
+            opacity: 0.7;
+            margin-top: 5px;
+            margin-left: 5px;
+            margin-right: 5px;
+        }
+
+        .starter-container {
+            text-align: center;
+            margin-top: 50px;
+            display: none;
+        }
+
+        .starter-chip {
+            background: white;
+            border: 1px solid #0d6efd;
+            color: #0d6efd;
+            padding: 8px 16px;
+            border-radius: 50px;
+            cursor: pointer;
+            margin: 5px;
+            display: inline-block;
+            transition: 0.2s;
+            font-size: 14px;
+        }
+
+            .starter-chip:hover {
+                background: #0d6efd;
+                color: white;
+                transform: translateY(-2px);
+            }
+
+        .chat-footer {
+            background: white;
+            padding: 15px;
+            border-top: 1px solid #ddd;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .chat-input {
+            background: #f0f2f5;
+            border: none;
+            border-radius: 25px;
+            padding: 12px 20px;
+            flex: 1;
+            outline: none;
+        }
+
+        .file-msg {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            text-decoration: none;
+            color: inherit;
+        }
+
+        .file-icon {
+            font-size: 28px;
+        }
+
+        .file-tag {
+            font-size: 10px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            font-weight: bold;
+            margin-bottom: 4px;
+            display: inline-block;
+            padding: 2px 6px;
+            border-radius: 4px;
+            background: rgba(0,0,0,0.1);
+        }
+
+        .btn-menu {
+            border: none;
+            background: transparent;
+            padding: 5px 10px;
+            border-radius: 50%;
+            transition: 0.2s;
+            color: #6c757d;
+        }
+
+            .btn-menu:hover {
+                background-color: #f0f2f5;
+                color: #000;
+            }
     </style>
 </head>
-<body class="p-3">
+<body>
 
-    <div class="container">
-        <div class="d-flex justify-content-between align-items-center mb-3">
-            <h3>💬 Study Chat</h3>
-            <a href="/Home/Feed" class="btn btn-outline-secondary">Back to Feed</a>
+    <div class="chat-header">
+        <div class="d-flex align-items-center">
+            <a href="/Home/Index" class="btn btn-light btn-sm me-3 border-0 rounded-circle"><i class="bi bi-arrow-left fs-5"></i></a>
+
+            <img id="header-img" src="" class="header-avatar me-3" onerror="this.src='https://ui-avatars.com/api/?name=User&background=random'">
+
+            <div>
+                <div class="d-flex align-items-center gap-2">
+                    <h5 class="mb-0 fw-bold" id="chat-name">Loading...</h5>
+                    <span class="badge bg-success-subtle text-success-emphasis border border-success-subtle rounded-pill" id="vibe-badge" style="font-size: 11px;">...</span>
+                </div>
+            </div>
         </div>
 
-        <div id="messages-list" class="chat-box p-3 rounded mb-3">
-        </div>
-
-        <div class="input-group">
-            <button class="btn btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#uploadModal">📎 Attach File</button>
-            <input type="text" id="msgInput" class="form-control" placeholder="Type a message...">
-            <button onclick="sendText()" class="btn btn-primary">Send</button>
+        <div class="dropdown">
+            <button class="btn-menu" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                <i class="bi bi-three-dots-vertical fs-5"></i>
+            </button>
+            <ul class="dropdown-menu dropdown-menu-end shadow border-0 rounded-4">
+                <li><button class="dropdown-item text-danger" onclick="deleteConversation()"><i class="bi bi-trash"></i> Delete Conversation</button></li>
+                <li><button class="dropdown-item" onclick="openReportModal()"><i class="bi bi-flag"></i> Report User</button></li>
+                <li><hr class="dropdown-divider"></li>
+                <li><button class="dropdown-item text-danger fw-bold" onclick="blockUser()"><i class="bi bi-slash-circle"></i> Block User</button></li>
+            </ul>
         </div>
     </div>
 
+    <div class="chat-container" id="scroll-container">
+        <div id="icebreakers" class="starter-container">
+            <div class="mb-4">
+                <div style="font-size: 40px;">👋</div>
+                <h5 class="text-muted fw-bold">Break the ice!</h5>
+                <p class="text-muted small">Start the conversation with a study topic.</p>
+            </div>
+            <div class="starter-chip shadow-sm" onclick="sendStarter('Hi! I saw we have similar study vibes! 🎓')">👋 Hi! I saw we matched!</div>
+            <div class="starter-chip shadow-sm" onclick="sendStarter('Are you free to study this week? 📚')">📚 Free to study this week?</div>
+            <div class="starter-chip shadow-sm" onclick="sendStarter('What subjects are you focusing on right now? 🧠')">🧠 What are you studying?</div>
+        </div>
+        <div id="message-list"></div>
+    </div>
+
+    <div class="chat-footer">
+        <button class="btn btn-light rounded-circle text-secondary" data-bs-toggle="modal" data-bs-target="#uploadModal">
+            <i class="bi bi-paperclip fs-5"></i>
+        </button>
+        <input type="text" id="messageInput" class="chat-input" placeholder="Type a message..." onkeypress="handleEnter(event)">
+        <button onclick="sendMessage()" class="btn btn-primary rounded-circle shadow-sm">
+            <i class="bi bi-send-fill"></i>
+        </button>
+    </div>
+
     <div class="modal fade" id="uploadModal" tabindex="-1">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title">Send Study Material</h5>
-                    <button class="btn-close" data-bs-dismiss="modal"></button>
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content rounded-4 border-0">
+                <div class="modal-header border-0">
+                    <h5 class="modal-title fw-bold">📤 Share Study Material</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body">
-                    <input type="file" id="fileInput" class="form-control mb-3">
-
-                    <label class="fw-bold">Which subject is this for?</label>
-                    <select id="fileSubject" class="form-select">
-                        <option value="Math">Mathematics</option>
-                        <option value="Programming">Programming</option>
-                        <option value="History">History</option>
-                    </select>
+                    <div class="mb-3">
+                        <label class="form-label fw-bold small text-muted">Select File</label>
+                        <input type="file" class="form-control" id="fileInput">
+                        <small class="text-danger" style="font-size:11px;">*Max size 1MB (Database Limit)</small>
+                    </div>
+                    <div class="mb-4">
+                        <label class="form-label fw-bold small text-muted">Subject Tag</label>
+                        <select class="form-select" id="subjectSelect">
+                            <optgroup label="General"><option>Mathematics</option><option>Science</option><option>English / Literature</option><option>History / Rizal</option><option>Filipino</option></optgroup>
+                            <optgroup label="Technology"><option>Programming</option><option>Web Development</option><option>Data Structures</option><option>Database</option><option>Networking</option></optgroup>
+                            <optgroup label="Business"><option>Accounting</option><option>Economics</option><option>Marketing</option></optgroup>
+                        </select>
+                    </div>
+                    <button onclick="handleFileUpload()" class="btn btn-primary w-100 rounded-pill">Send File 🚀</button>
                 </div>
-                <div class="modal-footer">
-                    <button onclick="sendFile()" class="btn btn-primary">Send Attachment</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="reportModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content rounded-4 border-0 shadow-lg">
+                <div class="modal-header border-0 bg-danger-subtle text-danger rounded-top-4">
+                    <h5 class="modal-title fw-bold"><i class="bi bi-exclamation-triangle-fill me-2"></i>Report User</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body p-4">
+                    <p class="small text-muted mb-3">Please describe why you are reporting this user. Our team will review the chat logs.</p>
+                    <div class="form-floating">
+                        <textarea class="form-control" placeholder="Leave a comment here" id="reportReason" style="height: 120px"></textarea>
+                        <label for="reportReason">Reason for reporting...</label>
+                    </div>
+                </div>
+                <div class="modal-footer border-0 p-3">
+                    <button type="button" class="btn btn-light rounded-pill px-4" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-danger rounded-pill px-4" onclick="submitReport()">Submit Report</button>
                 </div>
             </div>
         </div>
@@ -68,10 +284,8 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-app.js";
-        import { getFirestore, collection, addDoc, query, orderBy, onSnapshot, serverTimestamp }
-        from "https://www.gstatic.com/firebasejs/10.13.1/firebase-firestore.js";
+        import { getFirestore, collection, addDoc, query, orderBy, onSnapshot, doc, updateDoc, getDoc, deleteDoc, arrayUnion } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-firestore.js";
 
-        // 🔴 PASTE YOUR FIREBASE CONFIG HERE
         const firebaseConfig = {
             apiKey: "AIzaSyDrkRtgGhFWSvEiDr5pZy2sGDHI8HCpPt0",
             authDomain: "cramrades.firebaseapp.com",
@@ -83,60 +297,178 @@
 
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
-        const chatRef = collection(db, "chats");
 
-        // 1. Listen for Messages
-        const q = query(chatRef, orderBy("createdAt"));
+        const params = new URLSearchParams(window.location.search);
+        const chatId = params.get("chatId");
+        let partnerName = params.get("name") || "Student";
+        const partnerVibe = params.get("vibe") || "Student";
+        const partnerId = params.get("partnerId");
+        const myUid = localStorage.getItem("tempUid");
+
+        if(!chatId || !myUid) window.location.href = "/Home/Index";
+
+        document.getElementById("chat-name").innerText = partnerName;
+        document.getElementById("vibe-badge").innerText = partnerVibe;
+        document.getElementById("header-img").src = `https://ui-avatars.com/api/?name=${partnerName}&background=random`;
+
+        // --- FIX: LOAD REAL INFO (IMAGE AND NAME) ---
+        async function loadHeaderInfo() {
+            let uidToFetch = partnerId;
+            if (!uidToFetch) {
+                 try {
+                     const chatDoc = await getDoc(doc(db, "chats", chatId));
+                     if(chatDoc.exists()) {
+                         const participants = chatDoc.data().participants;
+                         uidToFetch = participants.find(p => p !== myUid);
+                     }
+                 } catch(e) { console.log("Could not find partner ID"); }
+            }
+            if (uidToFetch) {
+                try {
+                    const userDoc = await getDoc(doc(db, "users", uidToFetch));
+                    if (userDoc.exists()) {
+                        const data = userDoc.data();
+
+                        // UPDATE IMAGE
+                        if(data.photoURL) document.getElementById("header-img").src = data.photoURL;
+
+                        // UPDATE NAME
+                        if(data.name) {
+                            partnerName = data.name;
+                            document.getElementById("chat-name").innerText = data.name;
+                        }
+                    }
+                } catch(e) { console.error(e); }
+            }
+        }
+        loadHeaderInfo();
+
+        const messagesRef = collection(db, "chats", chatId, "messages");
+        const q = query(messagesRef, orderBy("createdAt", "asc"));
+
         onSnapshot(q, (snapshot) => {
-            const list = document.getElementById("messages-list");
-            list.innerHTML = "";
-            snapshot.forEach(doc => {
-                const data = doc.data();
+            const messageList = document.getElementById("message-list");
+            const icebreakers = document.getElementById("icebreakers");
+            const scrollContainer = document.getElementById("scroll-container");
 
-                // CHECK: Is it Text or File?
-                let content = "";
-                if (data.type === "text") {
-                    content = `<div>${data.text}</div>`;
-                } else {
-                    // Render the Attachment Card with Label
-                    content = `
-                        <div class="attachment rounded">
-                            <strong>📎 ${data.fileName}</strong><br>
-                            <span class="badge bg-secondary">${data.subjectLabel}</span>
-                        </div>
-                    `;
-                }
-
-                list.innerHTML += `<div class="mb-2 bg-white p-2 shadow-sm rounded">${content}</div>`;
-            });
-            list.scrollTop = list.scrollHeight;
+            messageList.innerHTML = "";
+            if (snapshot.empty) {
+                icebreakers.style.display = "block";
+            } else {
+                icebreakers.style.display = "none";
+                snapshot.forEach((doc) => {
+                    const msg = doc.data();
+                    renderMessage(msg, msg.senderId === myUid ? "me" : "them");
+                });
+                scrollContainer.scrollTop = scrollContainer.scrollHeight;
+            }
         });
 
-        // 2. Send Text
-        window.sendText = async () => {
-            const txt = document.getElementById("msgInput").value;
-            if(!txt) return;
-            await addDoc(chatRef, { type: "text", text: txt, createdAt: serverTimestamp() });
-            document.getElementById("msgInput").value = "";
+        function renderMessage(msg, type) {
+            const messageList = document.getElementById("message-list");
+            const div = document.createElement("div");
+            div.className = `message-row ${type}`;
+            let contentHtml = "";
+
+            if (msg.type === "file") {
+                contentHtml = `
+                    <div class="message-bubble shadow-sm">
+                        <a href="${msg.fileData}" download="${msg.fileName}" class="file-msg">
+                            <i class="bi bi-file-earmark-arrow-down-fill file-icon"></i>
+                            <div>
+                                <div class="file-tag">${msg.fileTag || "General"}</div>
+                                <div class="fw-bold" style="font-size:13px;">${msg.fileName}</div>
+                                <div style="font-size:11px; opacity:0.8;">Click to Download</div>
+                            </div>
+                        </a>
+                    </div>`;
+            } else {
+                contentHtml = `<div class="message-bubble shadow-sm">${msg.text}</div>`;
+            }
+            div.innerHTML = `${contentHtml}<span class="meta ${type === 'me' ? 'text-end' : ''}">${msg.time}</span>`;
+            messageList.appendChild(div);
         }
 
-        // 3. Send File (Simulated)
-        window.sendFile = async () => {
-            const file = document.getElementById("fileInput").files[0];
-            const subject = document.getElementById("fileSubject").value;
-            if(!file) return;
-
-            await addDoc(chatRef, {
-                type: "file",
-                fileName: file.name,
-                subjectLabel: subject, // <--- SAVING THE LABEL
-                createdAt: serverTimestamp()
-            });
-
-            // Close modal
-            const modal = bootstrap.Modal.getInstance(document.getElementById('uploadModal'));
-            modal.hide();
+        window.deleteConversation = async () => {
+            if (confirm("Are you sure you want to delete this conversation? This cannot be undone.")) {
+                try {
+                    await deleteDoc(doc(db, "chats", chatId));
+                    alert("Conversation deleted.");
+                    window.location.href = "/Home/Index";
+                } catch (error) { console.error(error); alert("Could not delete conversation."); }
+            }
         }
+
+        window.openReportModal = () => { new bootstrap.Modal(document.getElementById('reportModal')).show(); }
+
+        window.submitReport = async () => {
+            const reason = document.getElementById("reportReason").value.trim();
+            if (!reason) return alert("Please enter a reason.");
+            try {
+                await addDoc(collection(db, "reports"), { reporterId: myUid, reportedChatId: chatId, reportedName: partnerName, reason: reason, timestamp: new Date().toISOString() });
+                const modal = bootstrap.Modal.getInstance(document.getElementById('reportModal'));
+                modal.hide();
+                alert("Thanks for letting us know. We've received your report.");
+                document.getElementById("reportReason").value = "";
+            } catch (error) { console.error("Error reporting:", error); alert("Failed to send report."); }
+        }
+
+        window.blockUser = async () => {
+            if (confirm(`Are you sure you want to block ${partnerName}? You won't see them again.`)) {
+                try {
+                    let uidToBlock = partnerId;
+                    if(!uidToBlock) {
+                         const chatDoc = await getDoc(doc(db, "chats", chatId));
+                         if(chatDoc.exists()) { uidToBlock = chatDoc.data().participants.find(p => p !== myUid); }
+                    }
+                    if(uidToBlock) {
+                        const myRef = doc(db, "users", myUid);
+                        await updateDoc(myRef, { blockedUsers: arrayUnion(uidToBlock) });
+                        alert(`${partnerName} has been blocked.`);
+                        window.location.href = "/Home/Index";
+                    } else { alert("Error finding user to block."); }
+                } catch (error) { console.error(error); alert("Failed to block user."); }
+            }
+        }
+
+        window.sendMessage = async () => {
+            const input = document.getElementById("messageInput");
+            const text = input.value.trim();
+            if (!text) return;
+            input.value = "";
+            await saveToDB(text, "text");
+        }
+
+        window.sendStarter = async (text) => { await saveToDB(text, "text"); }
+
+        window.handleFileUpload = () => {
+            const fileInput = document.getElementById('fileInput');
+            const subjectSelect = document.getElementById('subjectSelect');
+            if (fileInput.files.length === 0) return alert("Select a file!");
+            const file = fileInput.files[0];
+            const subject = subjectSelect.value;
+            if (file.size > 1000000) return alert("File too big! Firestore limit is 1MB.");
+            const reader = new FileReader();
+            reader.onload = async function(e) {
+                const base64 = e.target.result;
+                const modal = bootstrap.Modal.getInstance(document.getElementById('uploadModal'));
+                modal.hide();
+                await saveToDB("📎 Shared " + subject + " file", "file", { fileName: file.name, fileData: base64, fileTag: subject });
+                fileInput.value = "";
+            };
+            reader.readAsDataURL(file);
+        }
+
+        async function saveToDB(text, type, extraData = {}) {
+            const timeString = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+            try {
+                await addDoc(messagesRef, { text: text, senderId: myUid, createdAt: new Date().toISOString(), time: timeString, type: type, ...extraData });
+                const chatDocRef = doc(db, "chats", chatId);
+                await updateDoc(chatDocRef, { lastMessage: text, lastMessageTime: new Date().toISOString() });
+            } catch (e) { console.error("Send error:", e); alert("Failed to send."); }
+        }
+
+        window.handleEnter = (e) => { if(e.key === "Enter") sendMessage(); }
     </script>
 </body>
 </html>

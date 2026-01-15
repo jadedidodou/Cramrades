@@ -4,52 +4,196 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <title>Sign Up</title>
+    <title>Sign Up | Cramrades</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+    <style>
+        body {
+            background-color: #f8f9fa;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+        }
+
+        .card {
+            border-radius: 15px;
+            border: none;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            width: 100%;
+            max-width: 400px;
+        }
+
+        .btn-primary {
+            background-color: #0d6efd;
+            border: none;
+            font-weight: bold;
+        }
+
+            .btn-primary:hover {
+                background-color: #0b5ed7;
+            }
+
+            .btn-primary:disabled {
+                background-color: #a0c4ff;
+            }
+
+        .form-control:focus {
+            box-shadow: none;
+            border-color: #0d6efd;
+        }
+
+        .validation-list {
+            list-style: none;
+            padding: 0;
+            margin-top: 10px;
+            font-size: 13px;
+        }
+
+        .validation-item {
+            color: #6c757d;
+            margin-bottom: 4px;
+            transition: 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+            .validation-item.valid {
+                color: #198754;
+                font-weight: bold;
+            }
+
+            .validation-item i {
+                font-size: 14px;
+            }
+    </style>
 </head>
-<body class="bg-light d-flex justify-content-center align-items-center" style="height: 100vh;">
+<body>
 
-    <div class="card shadow p-4" style="width: 400px;">
-        <h3 class="text-primary fw-bold text-center">Join Cramrades 🚀</h3>
-        <p class="text-center text-muted small">Step 1: Create Account</p>
+    <div class="card p-4">
+        <div class="text-center mb-4">
+            <h3 class="fw-bold text-primary">Join Cramrades 🚀</h3>
+            <p class="text-muted">Step 1: Create Account</p>
+        </div>
 
-        <input type="text" id="name" class="form-control mb-2" placeholder="Full Name">
-        <input type="email" id="email" class="form-control mb-2" placeholder="Email">
-        <input type="password" id="pass" class="form-control mb-3" placeholder="Password">
-
-        <button onclick="register()" class="btn btn-primary w-100">Next: Setup Profile ➡️</button>
+        <form onsubmit="handleSignUp(event)">
+            <div class="mb-3"><input type="text" id="name" class="form-control" placeholder="Full Name" required></div>
+            <div class="mb-3"><input type="email" id="email" class="form-control" placeholder="name@@example.com" required></div>
+            <div class="mb-3">
+                <input type="password" id="password" class="form-control" placeholder="Password" onkeyup="checkPassword()" required>
+                <ul class="validation-list">
+                    <li id="req-len" class="validation-item"><i class="bi bi-circle"></i> At least 8 characters</li>
+                    <li id="req-upper" class="validation-item"><i class="bi bi-circle"></i> One Uppercase Letter (A-Z)</li>
+                    <li id="req-num" class="validation-item"><i class="bi bi-circle"></i> One Number (0-9)</li>
+                    <li id="req-sym" class="validation-item"><i class="bi bi-circle"></i> One Symbol (&#64;$!%*?&)</li>
+                </ul>
+            </div>
+            <div class="mb-3"><input type="password" id="confirmPassword" class="form-control" placeholder="Confirm Password" required></div>
+            <button type="submit" id="submitBtn" class="btn btn-primary w-100 py-2" disabled>Next: Setup Profile ➡️</button>
+            <div class="text-center mt-3"><small>Already have an account? <a href="/Auth/Login">Login here</a></small></div>
+        </form>
     </div>
 
+    <div class="modal fade" id="successModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content rounded-4 border-0 shadow-lg">
+                <div class="modal-body p-5 text-center">
+                    <div class="mb-4"><div class="bg-success-subtle text-success rounded-circle d-inline-flex align-items-center justify-content-center" style="width: 80px; height: 80px;"><i class="bi bi-envelope-check-fill fs-1"></i></div></div>
+                    <h3 class="fw-bold mb-2">Check Your Inbox!</h3>
+                    <p class="text-muted mb-4">We've sent a verification link to your email.<br>Please verify to complete your registration.</p>
+                    <a href="/Auth/Login" class="btn btn-primary btn-lg rounded-pill w-100 fw-bold">Go to Login</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="errorModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered modal-sm">
+            <div class="modal-content rounded-4 border-0 shadow-lg">
+                <div class="modal-body p-4 text-center">
+                    <div class="mb-3"><div class="bg-danger-subtle text-danger rounded-circle d-inline-flex align-items-center justify-content-center" style="width: 50px; height: 50px;"><i class="bi bi-exclamation-triangle-fill fs-4"></i></div></div>
+                    <h5 class="fw-bold text-danger mb-2">Sign Up Failed</h5>
+                    <p class="text-muted small mb-3" id="error-msg">Something went wrong.</p>
+                    <button type="button" class="btn btn-light rounded-pill w-100 fw-bold" data-bs-dismiss="modal">Try Again</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-app.js";
-        import { getAuth, createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-auth.js";
+        import { getAuth, createUserWithEmailAndPassword, sendEmailVerification, signOut } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-auth.js";
+        import { getFirestore, doc, setDoc } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-firestore.js";
 
-        const firebaseConfig = { 
-            apiKey: "AIzaSyDrkRtgGhFWSvEiDr5pZy2sGDHI8HCpPt0",
-            authDomain: "cramrades.firebaseapp.com",
-            projectId: "cramrades",
-            storageBucket: "cramrades.firebasestorage.app",
-            messagingSenderId: "421414498264",
-            appId: "1:421414498264:web:58e04c186d5bdea7c88cad"
-        };
-
+        const firebaseConfig = { apiKey: "AIzaSyDrkRtgGhFWSvEiDr5pZy2sGDHI8HCpPt0", authDomain: "cramrades.firebaseapp.com", projectId: "cramrades", storageBucket: "cramrades.firebasestorage.app", messagingSenderId: "421414498264", appId: "1:421414498264:web:58e04c186d5bdea7c88cad" };
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
+        const db = getFirestore(app);
 
-        window.register = async () => {
+        window.checkPassword = () => {
+            const pw = document.getElementById("password").value;
+            const hasLen = pw.length >= 8;
+            const hasUpper = /[A-Z]/.test(pw);
+            const hasNum = /\d/.test(pw);
+            const hasSym = /[\x40$!%*?&]/.test(pw);
+
+            updateReq("req-len", hasLen); updateReq("req-upper", hasUpper);
+            updateReq("req-num", hasNum); updateReq("req-sym", hasSym);
+            document.getElementById("submitBtn").disabled = !(hasLen && hasUpper && hasNum && hasSym);
+        }
+
+        function updateReq(id, isValid) {
+            const el = document.getElementById(id);
+            const icon = el.querySelector("i");
+            if(isValid) { el.classList.add("valid"); icon.className = "bi bi-check-circle-fill"; }
+            else { el.classList.remove("valid"); icon.className = "bi bi-circle"; }
+        }
+
+        function showError(msg) {
+            document.getElementById("error-msg").innerText = msg;
+            new bootstrap.Modal(document.getElementById('errorModal')).show();
+        }
+
+        window.handleSignUp = async (e) => {
+            e.preventDefault();
             const email = document.getElementById("email").value;
-            const pass = document.getElementById("pass").value;
+            const password = document.getElementById("password").value;
+            const confirmPassword = document.getElementById("confirmPassword").value;
             const name = document.getElementById("name").value;
+            const btn = document.getElementById("submitBtn");
+
+            if(password !== confirmPassword) { showError("Passwords do not match!"); return; }
 
             try {
-                const cred = await createUserWithEmailAndPassword(auth, email, pass);
-                // Save Name briefly to LocalStorage to use on next page
-                localStorage.setItem("tempName", name);
-                localStorage.setItem("tempUid", cred.user.uid);
+                btn.disabled = true; btn.innerHTML = `<span class="spinner-border spinner-border-sm"></span> Creating Account...`;
+                const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+                const user = userCredential.user;
 
-                // REDIRECT TO PROFILE SETUP
-                window.location.href = "/Auth/ProfileSetup";
-            } catch (e) { alert(e.message); }
+                // --- CRITICAL UPDATE: profileCompleted: false ---
+                await setDoc(doc(db, "users", user.uid), {
+                    uid: user.uid,
+                    name: name,
+                    email: email,
+                    createdAt: new Date().toISOString(),
+                    photoURL: "",
+                    bio: "New Student",
+                    program: "General",
+                    blockedUsers: [],
+                    profileCompleted: false // THIS FLAG CONTROLS THE REDIRECT
+                });
+
+                await sendEmailVerification(user);
+                await signOut(auth); // LOGOUT IMMEDIATELY SO THEY CANT ENTER WITHOUT VERIFYING
+
+                new bootstrap.Modal(document.getElementById('successModal')).show();
+            } catch (error) {
+                console.error(error);
+                let msg = error.code === 'auth/email-already-in-use' ? "That email is already registered." : error.message;
+                showError(msg);
+                btn.disabled = false; btn.innerHTML = "Next: Setup Profile ➡️";
+            }
         }
     </script>
 </body>

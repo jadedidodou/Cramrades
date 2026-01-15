@@ -1,0 +1,374 @@
+﻿@{
+    Layout = null;
+}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Dashboard | Cramrades</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+    <style>
+        body {
+            background-color: #f4f6f8;
+            font-family: 'Segoe UI', sans-serif;
+        }
+
+        .nav-link.active {
+            color: #0d6efd !important;
+            border-bottom: 2px solid #0d6efd;
+            font-weight: bold;
+        }
+
+        .nav-link {
+            color: #6c757d;
+            margin-right: 15px;
+            cursor: pointer;
+        }
+
+        .card {
+            border: none;
+            border-radius: 12px;
+            transition: 0.2s;
+        }
+
+            .card:hover {
+                transform: translateY(-2px);
+                box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+            }
+
+        .navbar-avatar {
+            width: 40px;
+            height: 40px;
+            object-fit: cover;
+            border: 2px solid #e9ecef;
+        }
+
+        .file-card-icon {
+            font-size: 40px;
+            color: #0d6efd;
+        }
+
+        .chat-avatar {
+            width: 50px;
+            height: 50px;
+            object-fit: cover;
+            border-radius: 50%;
+            border: 1px solid #dee2e6;
+        }
+
+        .filter-btn {
+            border-radius: 50px;
+            font-size: 14px;
+            padding: 5px 15px;
+            font-weight: 500;
+            transition: 0.2s;
+        }
+
+            .filter-btn.active {
+                background-color: #0d6efd;
+                color: white;
+                border-color: #0d6efd;
+            }
+
+            .filter-btn:hover {
+                background-color: #e9ecef;
+            }
+
+            .filter-btn.active:hover {
+                background-color: #0b5ed7;
+            }
+    </style>
+</head>
+<body>
+
+    <nav class="navbar navbar-expand-lg sticky-top px-4 py-3 bg-white border-bottom">
+        <div class="container-fluid">
+            <a class="navbar-brand fw-bold text-primary" href="#">Cramrades</a>
+            <div class="d-flex align-items-center gap-3">
+                <a href="/Discover" class="btn btn-outline-primary rounded-pill fw-bold btn-sm">Find New Partner</a>
+                <div class="dropdown">
+                    <a href="#" class="d-block link-dark text-decoration-none" data-bs-toggle="dropdown" aria-expanded="false">
+                        <img id="navbar-img" src="https://ui-avatars.com/api/?name=User" alt="mdo" class="rounded-circle navbar-avatar shadow-sm">
+                    </a>
+                    <ul class="dropdown-menu dropdown-menu-end shadow border-0 rounded-4 mt-2">
+                        <li><h6 class="dropdown-header" id="dropdown-name">My Account</h6></li>
+                        <li><a class="dropdown-item" href="/Auth/ProfileEdit">✏️ Edit Profile</a></li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li><button class="dropdown-item text-danger fw-bold" onclick="showLogoutModal()">Log Out</button></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mt-4">
+        <h2 class="fw-bold mb-3">Dashboard</h2>
+        <ul class="nav nav-tabs border-0 mb-4">
+            <li class="nav-item"><a class="nav-link active" id="tab-messages" onclick="switchTab('messages')">Messages</a></li>
+            <li class="nav-item"><a class="nav-link" id="tab-files" onclick="switchTab('files')">Study Repository</a></li>
+        </ul>
+
+        <div id="filter-bar" class="d-none mb-4 gap-2">
+            <button onclick="filterFiles('All')" class="btn btn-outline-secondary filter-btn active" id="btn-All">All</button>
+            <button onclick="filterFiles('General')" class="btn btn-outline-secondary filter-btn" id="btn-General">General</button>
+            <button onclick="filterFiles('Technology')" class="btn btn-outline-secondary filter-btn" id="btn-Technology">Technology</button>
+            <button onclick="filterFiles('Business')" class="btn btn-outline-secondary filter-btn" id="btn-Business">Business</button>
+        </div>
+
+        <div id="content-area"></div>
+    </div>
+
+    <div class="modal fade" id="previewModal" tabindex="-1">
+        <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
+            <div class="modal-content rounded-4 border-0" style="height: 85vh;">
+                <div class="modal-header border-0 pb-0">
+                    <h5 class="modal-title fw-bold" id="preview-title">File Preview</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body p-0 d-flex align-items-center justify-content-center bg-light rounded-bottom-4 mt-3" id="preview-body"></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="alertModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered modal-sm">
+            <div class="modal-content rounded-4 border-0 shadow-lg">
+                <div class="modal-body p-4 text-center">
+                    <div class="mb-3">
+                        <div class="bg-light text-secondary rounded-circle d-inline-flex align-items-center justify-content-center" style="width: 50px; height: 50px;">
+                            <i class="bi bi-info-circle-fill fs-4"></i>
+                        </div>
+                    </div>
+                    <h5 class="fw-bold mb-2" id="alertTitle">Notice</h5>
+                    <p class="text-muted small mb-3" id="alertMessage">Something happened.</p>
+                    <button type="button" class="btn btn-dark rounded-pill w-100 fw-bold" data-bs-dismiss="modal">Okay</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="logoutModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered modal-sm">
+            <div class="modal-content rounded-4 border-0 shadow-lg">
+                <div class="modal-body p-4 text-center">
+                    <div class="mb-3">
+                        <div class="bg-danger-subtle text-danger rounded-circle d-inline-flex align-items-center justify-content-center" style="width: 60px; height: 60px;">
+                            <i class="bi bi-box-arrow-right fs-3"></i>
+                        </div>
+                    </div>
+                    <h5 class="fw-bold mb-2">Log Out?</h5>
+                    <p class="text-muted small mb-4">Are you sure you want to end your session?</p>
+                    <div class="d-grid gap-2">
+                        <button type="button" class="btn btn-danger rounded-pill fw-bold" onclick="confirmLogout()">Yes, Log Out</button>
+                        <button type="button" class="btn btn-light rounded-pill fw-bold" data-bs-dismiss="modal">Cancel</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-app.js";
+        import { getAuth, signOut } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-auth.js";
+        import { getFirestore, doc, getDoc, collection, query, where, getDocs, orderBy } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyDrkRtgGhFWSvEiDr5pZy2sGDHI8HCpPt0",
+            authDomain: "cramrades.firebaseapp.com",
+            projectId: "cramrades",
+            storageBucket: "cramrades.firebasestorage.app",
+            messagingSenderId: "421414498264",
+            appId: "1:421414498264:web:58e04c186d5bdea7c88cad"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+        const myUid = localStorage.getItem("tempUid");
+        let allCachedFiles = [];
+        const categoryMap = { "General": ["Mathematics", "Science", "English / Literature", "History / Rizal", "Filipino"], "Technology": ["Programming", "Web Development", "Data Structures", "Database", "Networking"], "Business": ["Accounting", "Economics", "Marketing"] };
+
+        async function initDashboard() {
+            if (!myUid) { window.location.href = "/Auth/Login"; return; }
+            try {
+                const docSnap = await getDoc(doc(db, "users", myUid));
+                if (docSnap.exists()) {
+                    const data = docSnap.data();
+                    document.getElementById("dropdown-name").innerText = data.name || "Student";
+                    document.getElementById("navbar-img").src = data.photoURL || `https://ui-avatars.com/api/?name=${data.name || "User"}&background=random`;
+                }
+            } catch (error) { console.error(error); }
+            loadMessagesFromDB();
+        }
+
+        window.switchTab = (tab) => {
+            document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
+            document.getElementById('filter-bar').classList.add('d-none');
+            document.getElementById('filter-bar').classList.remove('d-flex');
+            if(tab === 'messages') { document.getElementById('tab-messages').classList.add('active'); loadMessagesFromDB(); }
+            if(tab === 'files') { document.getElementById('tab-files').classList.add('active'); document.getElementById('filter-bar').classList.remove('d-none'); document.getElementById('filter-bar').classList.add('d-flex'); loadFilesFromDB(); }
+        }
+
+        async function loadMessagesFromDB() {
+            const container = document.getElementById("content-area");
+            container.innerHTML = `<div class="text-center py-5"><div class="spinner-border text-primary"></div><p>Loading chats...</p></div>`;
+
+            try {
+                const q = query(collection(db, "chats"), where("participants", "array-contains", myUid));
+                const querySnapshot = await getDocs(q);
+
+                if (querySnapshot.empty) {
+                    container.innerHTML = `<div class="text-center py-5 text-muted"><i class="bi bi-chat-dots fs-1"></i><p class="mt-2">No active chats. Go find a partner!</p><a href="/Discover" class="btn btn-primary rounded-pill">Find Partner</a></div>`;
+                    return;
+                }
+
+                let chatHTML = '<div class="list-group shadow-sm">';
+
+                const chatPromises = querySnapshot.docs.map(async (chatDoc) => {
+                    const chat = chatDoc.data();
+                    const chatId = chatDoc.id;
+                    const otherId = chat.participants.find(id => id !== myUid);
+                    // Default to old name
+                    let displayName = chat.participantNames[otherId] || "Study Partner";
+                    const otherVibe = chat.participantVibes ? chat.participantVibes[otherId] : "Student";
+
+                    let photoURL = "";
+                    try {
+                        const userSnap = await getDoc(doc(db, "users", otherId));
+                        if(userSnap.exists()) {
+                            const userData = userSnap.data();
+                            photoURL = userData.photoURL;
+                            // --- FIX: GET REAL NAME ---
+                            if(userData.name) displayName = userData.name;
+                        }
+                    } catch(e) { console.log("Error getting user data", e); }
+
+                    const imgSrc = photoURL || `https://ui-avatars.com/api/?name=${displayName}&background=random`;
+
+                    return `
+                        <a href="/Home/Messages?chatId=${chatId}&name=${displayName}&vibe=${otherVibe}&partnerId=${otherId}" class="list-group-item list-group-item-action d-flex align-items-center p-3 border-0 border-bottom">
+                            <img src="${imgSrc}" class="chat-avatar me-3 shadow-sm">
+                            <div class="flex-grow-1">
+                                <h6 class="mb-0 fw-bold">${displayName}</h6>
+                                <small class="text-muted text-truncate d-block" style="max-width: 200px;">${chat.lastMessage}</small>
+                            </div>
+                            <span class="text-muted small"> > </span>
+                        </a>
+                    `;
+                });
+
+                const chatItems = await Promise.all(chatPromises);
+                chatHTML += chatItems.join("");
+                chatHTML += '</div>';
+                container.innerHTML = chatHTML;
+
+            } catch(e) {
+                console.error(e);
+                container.innerHTML = `<p class="text-danger text-center">Error loading chats.</p>`;
+            }
+        }
+
+        async function loadFilesFromDB() {
+            const container = document.getElementById("content-area");
+            container.innerHTML = `<div class="text-center py-5"><div class="spinner-border text-primary"></div><p>Gathering files...</p></div>`;
+            try {
+                const qChats = query(collection(db, "chats"), where("participants", "array-contains", myUid));
+                const chatSnapshots = await getDocs(qChats);
+                allCachedFiles = [];
+                const promises = chatSnapshots.docs.map(async (chatDoc) => {
+                    const messagesRef = collection(db, "chats", chatDoc.id, "messages");
+                    const qFiles = query(messagesRef, where("type", "==", "file"));
+                    const fileSnaps = await getDocs(qFiles);
+                    const otherId = chatDoc.data().participants.find(id => id !== myUid);
+                    // Name might be stale here, but files usually matter less for display name.
+                    // To be safe, we can reuse logic, but for now relying on senderName is okay for performance.
+                    const senderName = chatDoc.data().participantNames[otherId] || "Partner";
+
+                    fileSnaps.forEach(f => {
+                        const fileData = f.data();
+                        allCachedFiles.push({ ...fileData, chatId: chatDoc.id, senderName: fileData.senderId === myUid ? "You" : senderName });
+                    });
+                });
+                await Promise.all(promises);
+                allCachedFiles.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+                renderFiles("All");
+            } catch(e) { console.error(e); container.innerHTML = `<p class="text-danger text-center">Error loading files.</p>`; }
+        }
+
+        window.filterFiles = (category) => {
+            document.querySelectorAll('.filter-btn').forEach(btn => { btn.classList.remove('active', 'btn-primary'); btn.classList.add('btn-outline-secondary'); });
+            const activeBtn = document.getElementById('btn-' + category);
+            activeBtn.classList.remove('btn-outline-secondary'); activeBtn.classList.add('active');
+            renderFiles(category);
+        }
+
+        function renderFiles(filter) {
+            const container = document.getElementById("content-area");
+            const filteredFiles = filter === "All" ? allCachedFiles : allCachedFiles.filter(f => {
+                if (f.fileTag === filter) return true;
+                if (categoryMap[filter] && categoryMap[filter].includes(f.fileTag)) return true;
+                return false;
+            });
+
+            if (filteredFiles.length === 0) { container.innerHTML = `<div class="text-center py-5 text-muted"><i class="bi bi-folder2-open fs-1"></i><p class="mt-2">No files found for "${filter}".</p></div>`; return; }
+
+            let html = '<div class="row g-3">';
+            filteredFiles.forEach((file, index) => {
+                let badgeClass = "bg-secondary";
+                if (file.fileTag === "Technology" || (categoryMap["Technology"] && categoryMap["Technology"].includes(file.fileTag))) badgeClass = "bg-primary";
+                else if (file.fileTag === "Business" || (categoryMap["Business"] && categoryMap["Business"].includes(file.fileTag))) badgeClass = "bg-success";
+                else if (file.fileTag === "General" || (categoryMap["General"] && categoryMap["General"].includes(file.fileTag))) badgeClass = "bg-info";
+
+                html += `
+                    <div class="col-md-4">
+                        <div class="card h-100 p-3 shadow-sm">
+                            <div class="d-flex align-items-start justify-content-between mb-2">
+                                <i class="bi bi-file-earmark-text-fill file-card-icon"></i>
+                                <span class="badge ${badgeClass}">${file.fileTag || "General"}</span>
+                            </div>
+                            <h6 class="fw-bold text-truncate mb-1" title="${file.fileName}">${file.fileName}</h6>
+                            <small class="text-muted mb-3">Shared by ${file.senderName} • ${file.time}</small>
+                            <div class="d-flex gap-2 mt-auto">
+                                <button onclick="previewFile(${index})" class="btn btn-sm btn-light border w-50">👁️ View</button>
+                                <a href="${file.fileData}" download="${file.fileName}" class="btn btn-sm btn-outline-primary w-50">Download</a>
+                            </div>
+                        </div>
+                    </div>`;
+            });
+            html += '</div>';
+            container.innerHTML = html;
+        }
+
+        window.previewFile = (index) => {
+             const activeFilterBtn = document.querySelector('.filter-btn.active');
+             const filter = activeFilterBtn ? activeFilterBtn.innerText : "All";
+             const filteredFiles = filter === "All" ? allCachedFiles : allCachedFiles.filter(f => {
+                if (f.fileTag === filter) return true;
+                if (categoryMap[filter] && categoryMap[filter].includes(f.fileTag)) return true;
+                return false;
+            });
+             const file = filteredFiles[index];
+
+             if(!file) {
+                 document.getElementById('alertTitle').innerText = "File Not Found";
+                 document.getElementById('alertMessage').innerText = "We couldn't locate this file in the list.";
+                 new bootstrap.Modal(document.getElementById('alertModal')).show();
+                 return;
+             }
+
+             document.getElementById('preview-title').innerText = file.fileName;
+             const body = document.getElementById('preview-body');
+             if(file.fileData.includes("image")) body.innerHTML = `<img src="${file.fileData}" class="img-fluid" style="max-height: 80vh;">`;
+             else if (file.fileData.includes("pdf")) body.innerHTML = `<iframe src="${file.fileData}" style="width:100%; height:80vh; border:none;"></iframe>`;
+             else body.innerHTML = `<div class="text-center p-5"><h1>📄</h1><p>Preview not available.</p><a href="${file.fileData}" download="${file.fileName}" class="btn btn-primary">Download</a></div>`;
+             new bootstrap.Modal(document.getElementById('previewModal')).show();
+        }
+
+        window.showLogoutModal = () => { new bootstrap.Modal(document.getElementById('logoutModal')).show(); }
+        window.confirmLogout = async () => { await signOut(auth); localStorage.clear(); window.location.href = "/Auth/Login"; }
+
+        initDashboard();
+    </script>
+</body>
+</html>

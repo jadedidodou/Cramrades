@@ -4,36 +4,192 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <title>Discover Matches</title>
+    <title>Discover | Cramrades</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
     <style>
-        .tinder-card {
+        body {
+            background-color: #f0f2f5;
+            font-family: 'Segoe UI', sans-serif;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .main-container {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .profile-card {
+            width: 100%;
             max-width: 400px;
-            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            overflow: hidden;
+            position: relative;
             transition: transform 0.3s;
         }
 
-            .tinder-card:hover {
-                transform: scale(1.02);
+        .card-img-top {
+            height: 280px;
+            object-fit: cover;
+            background: #ddd;
+        }
+
+        .compatibility-badge {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: rgba(13, 110, 253, 0.9);
+            color: white;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-weight: bold;
+            font-size: 14px;
+            backdrop-filter: blur(5px);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+        }
+
+        .match-reasons {
+            background: #f8f9fa;
+            border-radius: 12px;
+            padding: 15px;
+            font-size: 13px;
+            color: #495057;
+            margin-bottom: 15px;
+            border: 1px solid #e9ecef;
+        }
+
+        .match-reason-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 6px;
+            font-weight: 600;
+        }
+
+            .match-reason-item i {
+                color: #0d6efd;
+                font-size: 16px;
             }
+
+        .action-buttons {
+            display: flex;
+            gap: 15px;
+            padding: 15px;
+            justify-content: center;
+            background: white;
+            border-top: 1px solid #f0f0f0;
+        }
+
+        .btn-action {
+            width: 55px;
+            height: 55px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 22px;
+            transition: 0.2s;
+            border: none;
+        }
+
+        .btn-pass {
+            background: #fee;
+            color: #ff4b4b;
+        }
+
+            .btn-pass:hover {
+                background: #fcc;
+                transform: scale(1.1);
+            }
+
+        .btn-connect {
+            background: #eef;
+            color: #0d6efd;
+        }
+
+            .btn-connect:hover {
+                background: #ccf;
+                transform: scale(1.1);
+            }
+
+        .fade-out-left {
+            animation: flyLeft 0.5s forwards;
+        }
+
+        @@keyframes flyLeft {
+            to {
+                transform: translateX(-200px) rotate(-20deg);
+                opacity: 0;
+            }
+        }
     </style>
 </head>
-<body class="bg-light">
+<body>
 
-    <div class="container mt-5 text-center">
-        <h2 class="fw-bold">Study Partner Match 🧬</h2>
-        <p class="text-muted">Algorithmically finding your best peer.</p>
-
-        <div id="card-container" class="mt-4">
-            <div class="spinner-border text-primary"></div>
-            <p>Running compatibility heuristic...</p>
+    <nav class="navbar navbar-expand-lg bg-white border-bottom px-4 py-2">
+        <a class="navbar-brand fw-bold text-primary" href="/Home/Index">Cramrades</a>
+        <div class="ms-auto">
+            <a href="/Home/Index" class="btn btn-sm btn-outline-secondary rounded-pill">Back to Dashboard</a>
         </div>
+    </nav>
+
+    <div class="main-container">
+
+        <div id="loading" class="text-center">
+            <div class="spinner-border text-primary mb-3"></div>
+            <h5 class="text-muted">Calculating compatibility...</h5>
+        </div>
+
+        <div id="no-matches" class="text-center" style="display: none;">
+            <div class="mb-3" style="font-size: 50px;">😴</div>
+            <h4>No high matches found!</h4>
+            <p class="text-muted" style="max-width: 300px; margin: 0 auto;">
+                We only show students with <strong>>60% compatibility</strong>. Try updating your profile to match with more people.
+            </p>
+            <a href="/Home/Index" class="btn btn-primary rounded-pill mt-3">Go Home</a>
+        </div>
+
+        <div id="card-container" style="display: none;">
+            <div class="profile-card" id="current-card">
+
+                <div class="compatibility-badge">
+                    <i class="bi bi-stars"></i> <span id="score-display">0%</span> Match
+                </div>
+
+                <img id="card-img" class="card-img-top" src="" alt="Profile">
+
+                <div class="p-4 pb-0">
+                    <h3 class="fw-bold mb-1" id="card-name">Student Name</h3>
+                    <p class="text-primary fw-bold small mb-3" id="card-course">Course • Year</p>
+
+                    <div class="match-reasons" id="reasons-container"></div>
+
+                    <p class="text-muted small mb-3" id="card-bio">Bio goes here...</p>
+                </div>
+
+                <div class="action-buttons">
+                    <button class="btn-action btn-pass shadow-sm" onclick="passUser()">
+                        <i class="bi bi-x-lg"></i>
+                    </button>
+                    <button class="btn-action btn-connect shadow-sm" onclick="connectUser()">
+                        <i class="bi bi-chat-heart-fill"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+
     </div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-app.js";
-        import { getFirestore, collection, getDocs, getDoc, doc } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-firestore.js";
-        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-auth.js";
+        import { getFirestore, collection, getDocs, doc, getDoc, setDoc, query, where } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyDrkRtgGhFWSvEiDr5pZy2sGDHI8HCpPt0",
@@ -46,119 +202,180 @@
 
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
-        const auth = getAuth(app);
+        const myUid = localStorage.getItem("tempUid");
 
-        // GLOBAL VARIABLES TO TRACK MATCHES
-        let allMatches = []; // Store the full list here
-        let currentIndex = 0; // Track which user we are showing
+        let matches = [];
+        let currentIndex = 0;
+        let myProfile = {};
 
-        function calculateScore(me, candidate) {
+        // --- CONSTANT FOR THRESHOLD ---
+        const MIN_SCORE_THRESHOLD = 50;
+
+        async function initDiscover() {
+            if(!myUid) return window.location.href = "/Auth/Login";
+
+            try {
+                // 1. Get My Profile
+                const mySnap = await getDoc(doc(db, "users", myUid));
+                if(mySnap.exists()) myProfile = mySnap.data();
+
+                // 2. Get Ignore List (People I already chat with)
+                const qChats = query(collection(db, "chats"), where("participants", "array-contains", myUid));
+                const chatSnaps = await getDocs(qChats);
+                const ignoredIds = new Set();
+                ignoredIds.add(myUid);
+                chatSnaps.forEach(chatDoc => {
+                    const data = chatDoc.data();
+                    if(data.participants) data.participants.forEach(p => ignoredIds.add(p));
+                });
+
+                // 3. Get Users & Filter
+                const querySnapshot = await getDocs(collection(db, "users"));
+                let tempUsers = [];
+
+                querySnapshot.forEach((doc) => {
+                    const user = doc.data();
+
+                    // Filter 1: Must not be me or someone I know
+                    if (!ignoredIds.has(user.uid)) {
+
+                        const result = calculateCompatibility(user, myProfile);
+                        user.score = result.score;
+                        user.reasons = result.reasons;
+
+                        // Filter 2: SCORE MUST BE ABOVE 60%
+                        if (user.score > MIN_SCORE_THRESHOLD) {
+                            tempUsers.push(user);
+                        }
+                    }
+                });
+
+                matches = tempUsers.sort((a, b) => b.score - a.score);
+
+                document.getElementById("loading").style.display = "none";
+                if (matches.length > 0) {
+                    document.getElementById("card-container").style.display = "block";
+                    renderCard(matches[0]);
+                } else {
+                    document.getElementById("no-matches").style.display = "block";
+                }
+
+            } catch (error) {
+                console.error("Error:", error);
+                alert("Failed to load matches.");
+            }
+        }
+
+        function calculateCompatibility(them, me) {
             let score = 0;
             let reasons = [];
 
-            const mySubjs = me.skills.map(s => s.subject);
-            const theirSubjs = candidate.skills.map(s => s.subject);
-            const common = mySubjs.filter(x => theirSubjs.includes(x));
+            if (them.program === me.program) { score += 20; reasons.push(`📚 Both in ${me.program}`); }
+            if (them.studyVibe === me.studyVibe) { score += 20; reasons.push(`✨ Both like ${me.studyVibe} Vibe`); }
 
-            if(common.length > 0) {
-                score += 40;
-                reasons.push(`Studies ${common[0]}`);
+            if (me.skills && them.skills && Array.isArray(me.skills) && Array.isArray(them.skills)) {
+                const mySubjects = me.skills.map(s => s.subject);
+                const theirSubjects = them.skills.map(s => s.subject);
+                const commonSubjects = mySubjects.filter(sub => theirSubjects.includes(sub));
+
+                if (commonSubjects.length > 0) {
+                    score += (commonSubjects.length * 10);
+                    reasons.push(`🧠 Both studying ${commonSubjects[0]}`);
+                    if(commonSubjects.length > 1) { reasons.push(`🧠 And ${commonSubjects.length - 1} other shared subjects`); }
+                }
             }
 
-            common.forEach(sub => {
-                const mySkill = me.skills.find(s => s.subject === sub).level;
-                const theirSkill = candidate.skills.find(s => s.subject === sub).level;
+            if (them.location === me.location) { score += 10; reasons.push(`📍 Both from ${me.location}`); }
 
-                if(mySkill === "Beginner" && theirSkill === "Advanced") {
-                    score += 30;
-                    reasons.push("Can mentor you in " + sub);
-                } else if (mySkill === theirSkill) {
+            if (me.availability && them.availability) {
+                const commonDays = me.availability.filter(day => them.availability.includes(day));
+                if (commonDays.length > 0) {
                     score += 15;
-                    reasons.push("Same skill level");
-                }
-            });
-
-            if(me.availability && candidate.availability) {
-                const overlap = me.availability.filter(d => candidate.availability.includes(d));
-                if(overlap.length > 0) {
-                    score += 20;
-                    reasons.push(`Free on ${overlap.join(", ")}`);
+                    const matchDay = commonDays[0];
+                    let timeReason = `📅 Both free on ${matchDay}`;
+                    if (me.availabilityDetails && them.availabilityDetails) {
+                        const mySlot = me.availabilityDetails.find(d => d.day === matchDay);
+                        if(mySlot && mySlot.startTime && mySlot.startTime !== "Anytime") {
+                            timeReason += ` around ${mySlot.startTime}`;
+                        }
+                    }
+                    reasons.push(timeReason);
                 }
             }
+
+            if (me.preference !== "Everyone" && me.preference !== them.gender) score -= 50;
+            if (score > 100) score = 100;
+            if (score < 0) score = 0;
+
+            if (reasons.length === 0 && score > 0) reasons.push("🌱 Potential Match");
+            if (reasons.length === 0) reasons.push("👋 New Student");
+
             return { score, reasons };
         }
 
-        onAuthStateChanged(auth, async (user) => {
-            if (!user) { window.location.href = "/Auth/SignUp"; return; }
+        function renderCard(user) {
+            document.getElementById("card-name").innerText = user.name || "Student";
+            document.getElementById("card-course").innerText = (user.program || "Course") + " • " + (user.yearLevel || "Year");
+            const bio = user.bio || "No bio yet.";
+            document.getElementById("card-bio").innerText = bio.length > 100 ? bio.substring(0, 100) + "..." : bio;
+            document.getElementById("score-display").innerText = user.score + "%";
+            const imgEl = document.getElementById("card-img");
+            imgEl.src = user.photoURL || `https://ui-avatars.com/api/?name=${user.name || "User"}&background=random&size=400`;
 
-            const mySnap = await getDoc(doc(db, "users", user.uid));
-            const me = mySnap.data();
-            const allSnap = await getDocs(collection(db, "users"));
-
-            allMatches = []; // Reset list
-
-            allSnap.forEach(doc => {
-                if(doc.id === user.uid) return;
-                const candidate = doc.data();
-                const result = calculateScore(me, candidate);
-                // Only add people with at least some compatibility (> 0)
-                if (result.score > 0) {
-                    allMatches.push({ ...candidate, ...result });
-                }
+            const reasonsDiv = document.getElementById("reasons-container");
+            reasonsDiv.innerHTML = "";
+            const topReasons = user.reasons.slice(0, 4);
+            topReasons.forEach(r => {
+                reasonsDiv.innerHTML += `<div class="match-reason-item"><i class="bi bi-check-circle-fill"></i> ${r}</div>`;
             });
-
-            // SORT HIGHEST TO LOWEST
-            allMatches.sort((a, b) => b.score - a.score);
-
-            // Render the first one
-            renderCard();
-        });
-
-        // 1. Function to show the current card
-        function renderCard() {
-            const container = document.getElementById("card-container");
-            container.innerHTML = "";
-
-            // Check if we ran out of people
-            if (currentIndex >= allMatches.length) {
-                container.innerHTML = `
-                    <div class="text-center mt-5">
-                        <h3>🏁 No more matches!</h3>
-                        <p class="text-muted">You've viewed everyone in the database.</p>
-                        <button onclick="location.reload()" class="btn btn-outline-secondary">Start Over</button>
-                    </div>
-                `;
-                return;
-            }
-
-            const top = allMatches[currentIndex]; // Get current person
-
-            container.innerHTML = `
-                <div class="card shadow border-0 tinder-card p-4">
-                    <div class="display-1 text-primary fw-bold">${top.score}%</div>
-                    <h5 class="fw-bold mb-0">${top.name}</h5>
-                    <p class="text-muted">${top.yearLevel} • ${top.program}</p>
-                    <hr>
-                    <div class="text-start mb-4">
-                        <small class="text-muted fw-bold">WHY THIS MATCH?</small>
-                        <ul class="small text-secondary mt-1">
-                            ${top.reasons.map(r => `<li>✅ ${r}</li>`).join('')}
-                        </ul>
-                    </div>
-                    <div class="d-flex gap-2">
-                        <button onclick="passUser()" class="btn btn-outline-danger w-50">Pass</button>
-                        <a href="/Messages" class="btn btn-primary w-50">Connect</a>
-                    </div>
-                </div>
-                <div class="mt-3 text-muted small">Showing Match #${currentIndex + 1}</div>
-            `;
         }
 
-        // 2. The Logic for the "Pass" Button
         window.passUser = () => {
-            currentIndex++; // Move to the next person in the array
-            renderCard();   // Re-draw the screen
+            const card = document.getElementById("current-card");
+            card.classList.add("fade-out-left");
+            setTimeout(() => {
+                card.classList.remove("fade-out-left");
+                nextCard();
+            }, 300);
         }
+
+        window.connectUser = async () => {
+            const user = matches[currentIndex];
+            const btn = document.querySelector(".btn-connect");
+            btn.innerHTML = `<span class="spinner-border spinner-border-sm"></span>`;
+
+            const partnerName = user.name || "Student";
+            const myName = myProfile.name || "Me";
+            const chatId = [myUid, user.uid].sort().join("_");
+
+            try {
+                await setDoc(doc(db, "chats", chatId), {
+                    participants: [myUid, user.uid],
+                    participantNames: { [myUid]: myName, [user.uid]: partnerName },
+                    participantVibes: { [myUid]: myProfile.studyVibe, [user.uid]: user.studyVibe },
+                    lastMessage: "Started a new connection! 👋",
+                    lastMessageTime: new Date().toISOString()
+                }, { merge: true });
+
+                window.location.href = `/Home/Messages?chatId=${chatId}&name=${partnerName}&vibe=${user.studyVibe}`;
+            } catch (e) {
+                console.error(e);
+                alert("Connection failed.");
+                btn.innerHTML = `<i class="bi bi-chat-heart-fill"></i>`;
+            }
+        }
+
+        function nextCard() {
+            currentIndex++;
+            if (currentIndex < matches.length) {
+                renderCard(matches[currentIndex]);
+            } else {
+                document.getElementById("card-container").style.display = "none";
+                document.getElementById("no-matches").style.display = "block";
+            }
+        }
+
+        initDiscover();
     </script>
 </body>
 </html>

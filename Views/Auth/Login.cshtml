@@ -1,0 +1,173 @@
+﻿@{
+    Layout = null;
+}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Login | Cramrades</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+    <style>
+        body {
+            background-color: #f0f2f5;
+            font-family: 'Segoe UI', sans-serif;
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .login-card {
+            width: 100%;
+            max-width: 400px;
+            padding: 40px;
+            border-radius: 20px;
+            background: white;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+        }
+
+        .brand-icon {
+            font-size: 50px;
+            color: #0d6efd;
+            margin-bottom: 10px;
+        }
+
+        .form-control {
+            border-radius: 10px;
+            padding: 12px;
+            border: 1px solid #dee2e6;
+            background-color: #f8f9fa;
+        }
+
+            .form-control:focus {
+                background-color: white;
+                border-color: #0d6efd;
+                box-shadow: 0 0 0 4px rgba(13, 110, 253, 0.1);
+            }
+
+        .btn-primary {
+            padding: 12px;
+            border-radius: 10px;
+            font-weight: bold;
+            font-size: 16px;
+            background: #0d6efd;
+            border: none;
+            transition: 0.3s;
+        }
+
+            .btn-primary:hover {
+                background: #0b5ed7;
+                transform: translateY(-1px);
+            }
+    </style>
+</head>
+<body>
+
+    <div class="login-card text-center">
+        <div class="mb-3"><i class="bi bi-mortarboard-fill brand-icon"></i></div>
+        <h3 class="fw-bold mb-1">Welcome Back</h3>
+        <p class="text-muted mb-4">Login to continue matching.</p>
+
+        <div class="text-start">
+            <div class="mb-3">
+                <label class="fw-bold small mb-1">Email Address</label>
+                <div class="input-group">
+                    <span class="input-group-text bg-light border-end-0 rounded-start-3"><i class="bi bi-envelope text-muted"></i></span>
+                    <input type="email" id="email" class="form-control border-start-0 rounded-end-3" placeholder="name@example.com">
+                </div>
+            </div>
+
+            <div class="mb-4">
+                <label class="fw-bold small mb-1">Password</label>
+                <div class="input-group">
+                    <span class="input-group-text bg-light border-end-0 rounded-start-3"><i class="bi bi-lock text-muted"></i></span>
+                    <input type="password" id="password" class="form-control border-start-0 rounded-end-3" placeholder="••••••••">
+                </div>
+            </div>
+
+            <button onclick="handleLogin()" class="btn btn-primary w-100 shadow-sm" id="loginBtn">Sign In</button>
+        </div>
+
+        <p class="mt-4 text-muted small">Don't have an account? <a href="/Auth/SignUp" class="text-decoration-none fw-bold">Sign Up</a></p>
+    </div>
+
+    <div class="modal fade" id="errorModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered modal-sm">
+            <div class="modal-content rounded-4 border-0 shadow-lg">
+                <div class="modal-body p-4 text-center">
+                    <div class="mb-3"><div class="bg-danger-subtle text-danger rounded-circle d-inline-flex align-items-center justify-content-center" style="width: 50px; height: 50px;"><i class="bi bi-exclamation-triangle-fill fs-4"></i></div></div>
+                    <h5 class="fw-bold text-danger mb-2">Login Failed</h5>
+                    <p class="text-muted small mb-3" id="error-msg">Incorrect email or password.</p>
+                    <button type="button" class="btn btn-light rounded-pill w-100 fw-bold" data-bs-dismiss="modal">Try Again</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-app.js";
+        import { getAuth, signInWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-auth.js";
+        import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-firestore.js";
+
+        const firebaseConfig = { apiKey: "AIzaSyDrkRtgGhFWSvEiDr5pZy2sGDHI8HCpPt0", authDomain: "cramrades.firebaseapp.com", projectId: "cramrades", storageBucket: "cramrades.firebasestorage.app", messagingSenderId: "421414498264", appId: "1:421414498264:web:58e04c186d5bdea7c88cad" };
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        window.handleLogin = async () => {
+            const email = document.getElementById("email").value;
+            const pass = document.getElementById("password").value;
+            const btn = document.getElementById("loginBtn");
+
+            if (!email || !pass) { showError("Please fill in all fields."); return; }
+
+            try {
+                btn.innerHTML = `<span class="spinner-border spinner-border-sm"></span> Signing in...`;
+                const userCredential = await signInWithEmailAndPassword(auth, email, pass);
+                const user = userCredential.user;
+
+                // --- 1. EMAIL VERIFICATION CHECK ---
+                if (!user.emailVerified) {
+                    await signOut(auth); // Force logout
+                    showError("Please check your email and click the verification link before logging in.");
+                    btn.innerHTML = "Sign In";
+                    return;
+                }
+
+                // --- 2. PROFILE SETUP CHECK ---
+                const docSnap = await getDoc(doc(db, "users", user.uid));
+                let isSetup = false;
+                if (docSnap.exists()) {
+                    const data = docSnap.data();
+                    // If profileCompleted is TRUE, then they are setup.
+                    // If undefined or false, they are NOT setup.
+                    if (data.profileCompleted === true) isSetup = true;
+                }
+
+                // --- 3. REDIRECT ---
+                localStorage.setItem("tempUid", user.uid);
+                if (isSetup) {
+                    window.location.href = "/Home/Index"; // Dashboard
+                } else {
+                    window.location.href = "/Auth/ProfileEdit"; // First Time Setup
+                }
+
+            } catch (error) {
+                console.error(error);
+                let msg = "Incorrect email or password.";
+                if(error.code === "auth/user-not-found") msg = "No account found with this email.";
+                if(error.code === "auth/wrong-password") msg = "Incorrect password.";
+                if(error.code === "auth/invalid-email") msg = "Invalid email format.";
+                showError(msg);
+                btn.innerHTML = "Sign In";
+            }
+        }
+
+        function showError(message) {
+            document.getElementById("error-msg").innerText = message;
+            new bootstrap.Modal(document.getElementById('errorModal')).show();
+        }
+    </script>
+</body>
+</html>

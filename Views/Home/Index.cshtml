@@ -4,23 +4,35 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <title>Dashboard | Cramrades</title>
+    <link rel="icon" type="image/png" href="https://lh3.googleusercontent.com/u/0/d/1D0x68ABVp7J6UMG0svEjWsI8m9dLdlr4">
+    <title>Cramrades</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Carter+One&family=Fredoka:wght@300..700&family=Lexend:wght@100..900&display=swap" rel="stylesheet">
+
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
     <style>
         body {
             background-color: #f4f6f8;
-            font-family: 'Segoe UI', sans-serif;
+            font-family: 'Lexend', sans-serif;
+            color: #170007;
+        }
+
+        nav {
+            background-color: #fffcf8;
+			box-shadow: 0 2px 8px rgba(0,0,0,0.05);       
         }
 
         .nav-link.active {
-            color: #0d6efd !important;
-            border-bottom: 2px solid #0d6efd;
+            color: #5bcbff !important;
+            border-bottom: 2px solid #5bcbff;
             font-weight: bold;
         }
 
         .nav-link {
-            color: #6c757d;
+            color: #48B584;
             margin-right: 15px;
             cursor: pointer;
         }
@@ -40,12 +52,12 @@
             width: 40px;
             height: 40px;
             object-fit: cover;
-            border: 2px solid #e9ecef;
+            border: 2px solid #fffcf8;
         }
 
         .file-card-icon {
             font-size: 40px;
-            color: #0d6efd;
+            color: #48B584;
         }
 
         .chat-avatar {
@@ -53,7 +65,7 @@
             height: 50px;
             object-fit: cover;
             border-radius: 50%;
-            border: 1px solid #dee2e6;
+            border: 1px solid #fffcf8;
         }
 
         .filter-btn {
@@ -65,34 +77,46 @@
         }
 
             .filter-btn.active {
-                background-color: #0d6efd;
+                background-color: #48B584;
                 color: white;
-                border-color: #0d6efd;
+                border-color: #48B584;
             }
 
             .filter-btn:hover {
-                background-color: #e9ecef;
+                background-color: #5bcbff;
             }
 
             .filter-btn.active:hover {
-                background-color: #0b5ed7;
+                background-color: #5bcbff;
             }
+
     </style>
 </head>
 <body>
 
-    <nav class="navbar navbar-expand-lg sticky-top px-4 py-3 bg-white border-bottom">
+    <nav class="navbar navbar-expand-lg sticky-top px-4 py-3 border-bottom">
         <div class="container-fluid">
-            <a class="navbar-brand fw-bold text-primary" href="#">Cramrades</a>
+
+            <a class="navbar-brand d-flex align-items-center" href="/Home/Index">
+                <img src="https://lh3.googleusercontent.com/u/0/d/1D0x68ABVp7J6UMG0svEjWsI8m9dLdlr4"
+                     alt="Cramrades Logo"
+                     style="height: 40px; width: auto; object-fit: contain;"
+                     class="me-2">
+
+                <span style="font-family: 'Fredoka', sans-serif; font-weight: bold; font-size: 35px; color: #ffa4c0;">
+                    Cramrades
+                </span>
+            </a>
+
             <div class="d-flex align-items-center gap-3">
-                <a href="/Discover" class="btn btn-outline-primary rounded-pill fw-bold btn-sm">Find New Partner</a>
+                <a href="/Discover" class="btn btn-outline-primary rounded-pill fw-bold btn-sm">Find a Cramrade</a>
                 <div class="dropdown">
                     <a href="#" class="d-block link-dark text-decoration-none" data-bs-toggle="dropdown" aria-expanded="false">
                         <img id="navbar-img" src="https://ui-avatars.com/api/?name=User" alt="mdo" class="rounded-circle navbar-avatar shadow-sm">
                     </a>
                     <ul class="dropdown-menu dropdown-menu-end shadow border-0 rounded-4 mt-2">
                         <li><h6 class="dropdown-header" id="dropdown-name">My Account</h6></li>
-                        <li><a class="dropdown-item" href="/Auth/ProfileEdit">✏️ Edit Profile</a></li>
+                        <li><a class="dropdown-item" href="/Auth/ProfileEdit">Edit Profile</a></li>
                         <li><hr class="dropdown-divider"></li>
                         <li><button class="dropdown-item text-danger fw-bold" onclick="showLogoutModal()">Log Out</button></li>
                     </ul>
@@ -105,7 +129,7 @@
         <h2 class="fw-bold mb-3">Dashboard</h2>
         <ul class="nav nav-tabs border-0 mb-4">
             <li class="nav-item"><a class="nav-link active" id="tab-messages" onclick="switchTab('messages')">Messages</a></li>
-            <li class="nav-item"><a class="nav-link" id="tab-files" onclick="switchTab('files')">Study Repository</a></li>
+            <li class="nav-item"><a class="nav-link" id="tab-files" onclick="switchTab('files')">File Repository</a></li>
         </ul>
 
         <div id="filter-bar" class="d-none mb-4 gap-2">

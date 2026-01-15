@@ -4,7 +4,13 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <title>Sign Up | Cramrades</title>
+    <link rel="icon" type="image/png" href="https://lh3.googleusercontent.com/u/0/d/1D0x68ABVp7J6UMG0svEjWsI8m9dLdlr4">
+    <title>Cramrades</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Carter+One&family=Fredoka:wght@300..700&family=Lexend:wght@100..900&display=swap" rel="stylesheet">
+
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
     <style>
@@ -14,6 +20,8 @@
             align-items: center;
             justify-content: center;
             height: 100vh;
+            color: #170007;
+            font-family: "Lexend", sans-serif;
         }
 
         .card {
@@ -21,26 +29,42 @@
             border: none;
             box-shadow: 0 4px 12px rgba(0,0,0,0.1);
             width: 100%;
-            max-width: 400px;
+            max-width: 450px;
+            background-color: #fffcf8;
         }
 
+        h1 {
+            padding-top: 20px;
+            font-family: "Fredoka", sans-serif;        }
+
+        a {
+            color: #ffa4c0;
+			text-decoration: none;
+			font-weight: bold;
+        }
+
+            a:hover {
+                color: #48B584;
+			}
+
         .btn-primary {
-            background-color: #0d6efd;
+            background-color: #48B584;
             border: none;
             font-weight: bold;
         }
 
             .btn-primary:hover {
-                background-color: #0b5ed7;
+                background-color: #ffa4c0;
+                transform: translateY(-1px);
             }
 
             .btn-primary:disabled {
-                background-color: #a0c4ff;
+                background-color: #BAD6CA;
             }
 
         .form-control:focus {
             box-shadow: none;
-            border-color: #0d6efd;
+            border-color: #ffa4c0;
         }
 
         .validation-list {
@@ -60,7 +84,7 @@
         }
 
             .validation-item.valid {
-                color: #198754;
+                color: #48B584;
                 font-weight: bold;
             }
 
@@ -73,8 +97,8 @@
 
     <div class="card p-4">
         <div class="text-center mb-4">
-            <h3 class="fw-bold text-primary">Join Cramrades 🚀</h3>
-            <p class="text-muted">Step 1: Create Account</p>
+            <h1 class="fw-bold">Join Cramrades</h1>
+            <p class="text-muted">Create Your Account</p>
         </div>
 
         <form onsubmit="handleSignUp(event)">
@@ -90,7 +114,7 @@
                 </ul>
             </div>
             <div class="mb-3"><input type="password" id="confirmPassword" class="form-control" placeholder="Confirm Password" required></div>
-            <button type="submit" id="submitBtn" class="btn btn-primary w-100 py-2" disabled>Next: Setup Profile ➡️</button>
+            <button type="submit" id="submitBtn" class="btn btn-primary w-100 py-2" disabled>Sign up</button>
             <div class="text-center mt-3"><small>Already have an account? <a href="/Auth/Login">Login here</a></small></div>
         </form>
     </div>

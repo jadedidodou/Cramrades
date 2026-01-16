@@ -15,29 +15,97 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
     <style>
         body {
-            background-color: #f0f2f5;
+            background-color: #ffffff;
             height: 100vh;
             overflow: hidden;
-            display: flex;
-            flex-direction: column;
             font-family: 'Lexend', sans-serif;
             color: #170007;
+            margin: 0;
+            background-image: url('/images/background.png');
+            background-size: cover;
+            background-position: center;
         }
 
-        .chat-header {
-            background: white;
-            padding: 10px 20px;
-            border-bottom: 1px solid #ddd;
+        .app-container {
+            display: flex;
+            height: 100vh;
+            width: 100vw;
+        }
+
+        .sidebar {
+            width: 360px;
+            background: #fffcf8;
+            border-right: 1px solid #ddd;
+            display: flex;
+            flex-direction: column;
+            flex-shrink: 0;
+            z-index: 20;
+        }
+
+        .sidebar-header {
+            padding: 15px 20px;
             display: flex;
             align-items: center;
             justify-content: space-between;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+            font-weight: bold;
+            font-size: 24px;
+        }
+
+        .sidebar-scroll {
+            flex: 1;
+            overflow-y: auto;
+            padding: 10px;
+        }
+
+        .chat-item {
+            display: flex;
+            align-items: center;
+            padding: 10px 15px;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: 0.2s;
+            text-decoration: none;
+            margin-bottom: 5px;
+        }
+
+            .chat-item:hover {
+                background-color: #f0f2f5;
+            }
+
+            .chat-item.active {
+                background-color: #FFEBF1;
+            }
+
+        .chat-item-avatar {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            object-fit: cover;
+            margin-right: 15px;
+            background-color: #eee;
+        }
+
+        .main-chat-area {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+        }
+
+        .chat-header {
+            background: #fffcf8;
+            backdrop-filter: blur(10px);
+            padding: 10px 20px;
+            border-bottom: 1px solid rgba(0,0,0,0.05);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
             z-index: 10;
         }
 
         .header-avatar {
-            width: 45px;
-            height: 45px;
+            width: 40px;
+            height: 40px;
             border-radius: 50%;
             object-fit: cover;
             border: 2px solid white;
@@ -50,27 +118,32 @@
             padding: 20px;
             display: flex;
             flex-direction: column;
-            background-color: #f0f2f5;
+            background-color: rgba(255, 255, 255, 0.6); /* White tint over bg */
         }
 
         #message-list {
             display: flex;
             flex-direction: column;
-            gap: 15px;
+            gap: 2px;
+            width: 100%;
+            max-width: 850px;
+            margin: 0 auto;
         }
 
         .message-row {
             display: flex;
             flex-direction: column;
             max-width: 75%;
+            margin-bottom: 2px;
         }
 
         .message-bubble {
-            padding: 12px 16px;
+            padding: 10px 14px;
             border-radius: 18px;
             font-size: 15px;
             word-wrap: break-word;
             position: relative;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.1);
         }
 
         .me {
@@ -79,7 +152,7 @@
         }
 
             .me .message-bubble {
-                background: #0d6efd;
+                background: #48B584;
                 color: white;
                 border-bottom-right-radius: 4px;
             }
@@ -90,49 +163,53 @@
         }
 
             .them .message-bubble {
-                background: white;
+                background: #fffcf8;
                 color: #333;
-                border: 1px solid #e5e5e5;
                 border-bottom-left-radius: 4px;
             }
 
         .meta {
-            font-size: 11px;
-            opacity: 0.7;
-            margin-top: 5px;
-            margin-left: 5px;
-            margin-right: 5px;
-        }
-
-        .starter-container {
-            text-align: center;
-            margin-top: 50px;
-            display: none;
-        }
-
-        .starter-chip {
-            background: white;
-            border: 1px solid #0d6efd;
-            color: #0d6efd;
-            padding: 8px 16px;
-            border-radius: 50px;
-            cursor: pointer;
-            margin: 5px;
-            display: inline-block;
+            font-size: 10px;
+            color: #6c757d;
+            margin: 2px 5px;
+            opacity: 0;
             transition: 0.2s;
-            font-size: 14px;
         }
 
-            .starter-chip:hover {
-                background: #0d6efd;
-                color: white;
-                transform: translateY(-2px);
-            }
+        .message-row:hover .meta {
+            opacity: 1;
+        }
+
+        .date-separator {
+            text-align: center;
+            margin: 20px 0 10px 0;
+            font-size: 11px;
+            color: #6c757d;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            background: rgba(255,255,255,0.6);
+            display: inline-block;
+            align-self: center;
+            padding: 4px 12px;
+            border-radius: 20px;
+        }
 
         .chat-footer {
-            background: white;
+            background-color: #fffcf8;
             padding: 15px;
-            border-top: 1px solid #ddd;
+            display: flex;
+            justify-content: center;
+        }
+
+        .chat-footer .btn-primary {
+				background-color: #48B584;
+				border-color: #48B584;
+        }
+
+        .footer-content {
+            width: 100%;
+            max-width: 850px;
             display: flex;
             align-items: center;
             gap: 10px;
@@ -147,36 +224,11 @@
             outline: none;
         }
 
-        .file-msg {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            text-decoration: none;
-            color: inherit;
-        }
-
-        .file-icon {
-            font-size: 28px;
-        }
-
-        .file-tag {
-            font-size: 10px;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            font-weight: bold;
-            margin-bottom: 4px;
-            display: inline-block;
-            padding: 2px 6px;
-            border-radius: 4px;
-            background: rgba(0,0,0,0.1);
-        }
-
         .btn-menu {
             border: none;
             background: transparent;
             padding: 5px 10px;
             border-radius: 50%;
-            transition: 0.2s;
             color: #6c757d;
         }
 
@@ -184,83 +236,157 @@
                 background-color: #f0f2f5;
                 color: #000;
             }
+
+        #match-badge {
+            color: #48B584;
+        }
+
+        .badge-high-match {
+            background-color: #48B584 !important; 
+            color: white !important;
+            border: 1px solid #48B584;
+        }
+        .badge-mid-match {
+            background-color: #ffc107 !important; 
+            color: #000 !important;
+            border: 1px solid #ffc107;
+        }
+        .badge-low-match {
+            background-color: #f8d7da !important;
+            color: #721c24 !important;
+            border: 1px solid #f5c6cb;
+        }
+
+        @@media (max-width: 768px) {
+            .sidebar {
+                display: none;
+            }
+        }
     </style>
 </head>
 <body>
 
-    <div class="chat-header">
-        <div class="d-flex align-items-center">
-            <a href="/Home/Index" class="btn btn-light btn-sm me-3 border-0 rounded-circle"><i class="bi bi-arrow-left fs-5"></i></a>
-
-            <img id="header-img" src="" class="header-avatar me-3" onerror="this.src='https://ui-avatars.com/api/?name=User&background=random'">
-
-            <div>
-                <div class="d-flex align-items-center gap-2">
-                    <h5 class="mb-0 fw-bold" id="chat-name">Loading...</h5>
-                    <span class="badge bg-success-subtle text-success-emphasis border border-success-subtle rounded-pill" id="vibe-badge" style="font-size: 11px;">...</span>
+    <div class="app-container">
+        <div class="sidebar d-none d-md-flex">
+            <div class="sidebar-header">
+                <span>Chats</span>
+                <a href="/Home/Index" class="btn btn-sm "><i class="bi bi-house-door-fill" style="color: #ffa4c0; font-size: 30px"></i></a>
+            </div>
+            <div class="p-2">
+                <input type="text" id="searchInput" class="form-control rounded-pill bg-light border-0" placeholder="Search chats..." onkeyup="filterChats()">
+            </div>
+            <div class="sidebar-scroll" id="sidebar-list">
+                <div class="text-center mt-5 text-muted">
+                    <div class="spinner-border spinner-border-sm"></div>
+                    <p class="small mt-2">Loading...</p>
                 </div>
             </div>
         </div>
 
-        <div class="dropdown">
-            <button class="btn-menu" type="button" data-bs-toggle="dropdown" aria-expanded="false">
-                <i class="bi bi-three-dots-vertical fs-5"></i>
-            </button>
-            <ul class="dropdown-menu dropdown-menu-end shadow border-0 rounded-4">
-                <li><button class="dropdown-item text-danger" onclick="deleteConversation()"><i class="bi bi-trash"></i> Delete Conversation</button></li>
-                <li><button class="dropdown-item" onclick="openReportModal()"><i class="bi bi-flag"></i> Report User</button></li>
-                <li><hr class="dropdown-divider"></li>
-                <li><button class="dropdown-item text-danger fw-bold" onclick="blockUser()"><i class="bi bi-slash-circle"></i> Block User</button></li>
-            </ul>
-        </div>
-    </div>
+        <div class="main-chat-area">
+            <div class="chat-header">
+                <div class="d-flex align-items-center w-100" style="max-width: 850px; margin: 0 auto;">
+                    <a href="/Home/Index" class="btn btn-light btn-sm me-3 border-0 rounded-circle shadow-sm d-md-none">
+                        <i class="bi bi-arrow-left fs-5"></i>
+                    </a>
 
-    <div class="chat-container" id="scroll-container">
-        <div id="icebreakers" class="starter-container">
-            <div class="mb-4">
-                <div style="font-size: 40px;">👋</div>
-                <h5 class="text-muted fw-bold">Break the ice!</h5>
-                <p class="text-muted small">Start the conversation with a study topic.</p>
+                    <div class="d-flex align-items-center flex-grow-1 p-1 rounded ps-2 position-relative"
+                         onclick="openPartnerProfile()"
+                         style="cursor: pointer; z-index: 1050;">
+
+                        <img id="header-img" src="" class="header-avatar me-3"
+                             onerror="this.onerror=null; this.src='https://ui-avatars.com/api/?name=Student&background=random'">
+
+                        <div>
+                            <div class="d-flex align-items-center gap-2">
+                                <h5 class="mb-0 fw-bold text-dark" id="chat-name">Loading...</h5>
+                            </div>
+                            <small class="text-muted" style="font-size: 0.75rem;">Tap to view details</small>
+                        </div>
+                    </div>
+
+                    <div class="dropdown ms-auto">
+                        <button class="btn-menu" type="button" data-bs-toggle="dropdown"><i class="bi bi-three-dots-vertical fs-5"></i></button>
+                        <ul class="dropdown-menu dropdown-menu-end shadow border-0 rounded-4">
+                            <li><button class="dropdown-item text-danger" onclick="deleteConversation()"><i class="bi bi-trash"></i> Delete Conversation</button></li>
+                            <li><button class="dropdown-item" onclick="openReportModal()"><i class="bi bi-flag"></i> Report User</button></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><button class="dropdown-item text-danger fw-bold" onclick="blockUser()"><i class="bi bi-slash-circle"></i> Block User</button></li>
+                        </ul>
+                    </div>
+                </div>
             </div>
-            <div class="starter-chip shadow-sm" onclick="sendStarter('Hi! I saw we have similar study vibes! 🎓')">👋 Hi! I saw we matched!</div>
-            <div class="starter-chip shadow-sm" onclick="sendStarter('Are you free to study this week? 📚')">📚 Free to study this week?</div>
-            <div class="starter-chip shadow-sm" onclick="sendStarter('What subjects are you focusing on right now? 🧠')">🧠 What are you studying?</div>
+
+            <div class="chat-container" id="scroll-container">
+                <div id="icebreakers" class="text-center mt-5" style="display:none; max-width:850px; margin:50px auto;">
+                    <div class="mb-4" style="font-size: 40px;">👋</div>
+                    <h5 class="text-muted fw-bold">Break the ice!</h5>
+                    <div class="mt-3">
+                        <button class="btn btn-outline-primary rounded-pill m-1" onclick="sendStarter('Hi! I saw we have similar study vibes! 🎓')">👋 Hi! We matched!</button>
+                        <button class="btn btn-outline-primary rounded-pill m-1" onclick="sendStarter('Are you free to study? 📚')">📚 Free to study?</button>
+                    </div>
+                </div>
+                <div id="message-list"></div>
+            </div>
+
+            <div class="chat-footer">
+                <div class="footer-content">
+                    <button class="btn btn-light rounded-circle text-secondary" data-bs-toggle="modal" data-bs-target="#uploadModal"><i class="bi bi-paperclip fs-5"></i></button>
+                    <input type="text" id="messageInput" class="chat-input" placeholder="Type a message..." onkeypress="handleEnter(event)">
+                    <button onclick="sendMessage()" class="btn btn-primary rounded-circle shadow-sm"><i class="bi bi-send-fill"></i></button>
+                </div>
+            </div>
         </div>
-        <div id="message-list"></div>
     </div>
 
-    <div class="chat-footer">
-        <button class="btn btn-light rounded-circle text-secondary" data-bs-toggle="modal" data-bs-target="#uploadModal">
-            <i class="bi bi-paperclip fs-5"></i>
-        </button>
-        <input type="text" id="messageInput" class="chat-input" placeholder="Type a message..." onkeypress="handleEnter(event)">
-        <button onclick="sendMessage()" class="btn btn-primary rounded-circle shadow-sm">
-            <i class="bi bi-send-fill"></i>
-        </button>
+    <div class="modal fade rounded-4" id="partnerProfileModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content border-0 shadow rounded-4">
+                <div class="modal-header bg-light border-0 d-flex flex-column align-items-center pt-5 pb-4" style="background-image: url('/images/profile bg.png'); background-size: cover">
+                    <button type="button" class="btn-close position-absolute top-0 end-0 m-3" data-bs-dismiss="modal"></button>
+                    <img id="raw-img" src="" class="rounded-circle shadow-sm mb-3" style="width: 100px; height: 100px; object-fit: cover;">
+                    <h4 id="raw-name" class="fw-bold mb-0">User</h4>
+                    <span id="match-badge" class="badge bg-white border border-danger-subtle rounded-pill mt-2 text-danger">0% Match</span>
+                </div>
+                <div class="modal-body px-4 pb-4" style="height:400px; overflow-y: auto; background-color:#fffcf8">
+                    <label class="small fw-bold text-muted">About</label><p id="raw-bio" class="small mb-2">...</p>
+                    <label class="small fw-bold text-muted">Vibe</label><p id="raw-vibe" class="small mb-2">...</p>
+                    <label class="small fw-bold text-muted">Program</label><p id="raw-program" class="small mb-2">...</p>
+                    <label class="small fw-bold text-muted">Skills</label><div id="raw-skills" class="d-flex flex-wrap mb-2"></div>
+                    <label class="small fw-bold text-muted">Availability</label><div id="raw-schedule" class="mt-1 border rounded bg-white"></div>
+                </div>
+            </div>
+        </div>
     </div>
 
     <div class="modal fade" id="uploadModal" tabindex="-1">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content rounded-4 border-0">
-                <div class="modal-header border-0">
-                    <h5 class="modal-title fw-bold">📤 Share Study Material</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                </div>
-                <div class="modal-body">
-                    <div class="mb-3">
-                        <label class="form-label fw-bold small text-muted">Select File</label>
-                        <input type="file" class="form-control" id="fileInput">
-                        <small class="text-danger" style="font-size:11px;">*Max size 1MB (Database Limit)</small>
-                    </div>
-                    <div class="mb-4">
-                        <label class="form-label fw-bold small text-muted">Subject Tag</label>
-                        <select class="form-select" id="subjectSelect">
-                            <optgroup label="General"><option>Mathematics</option><option>Science</option><option>English / Literature</option><option>History / Rizal</option><option>Filipino</option></optgroup>
-                            <optgroup label="Technology"><option>Programming</option><option>Web Development</option><option>Data Structures</option><option>Database</option><option>Networking</option></optgroup>
-                            <optgroup label="Business"><option>Accounting</option><option>Economics</option><option>Marketing</option></optgroup>
-                        </select>
-                    </div>
-                    <button onclick="handleFileUpload()" class="btn btn-primary w-100 rounded-pill">Send File 🚀</button>
+                <div class="modal-body p-4">
+                    <h5 class="fw-bold mb-3">📤 Share File</h5>
+                    <input type="file" class="form-control mb-3" id="fileInput">
+                    <select class="form-select mb-3" id="subjectSelect">
+                        <optgroup label="General">
+                            <option>Mathematics</option>
+                            <option>Science</option>
+                            <option>English / Literature</option>
+                            <option>History / Rizal</option>
+                            <option>Filipino</option>
+                        </optgroup>
+                        <optgroup label="Technology">
+                            <option>Programming</option>
+                            <option>Web Development</option>
+                            <option>Data Structures</option>
+                            <option>Database</option>
+                            <option>Networking</option>
+                        </optgroup>
+                        <optgroup label="Business">
+                            <option>Accounting</option>
+                            <option>Economics</option>
+                            <option>Marketing</option>
+                        </optgroup>
+                    </select>
+                    <button onclick="handleFileUpload()" class="btn w-100 rounded-pill" style="background-color: #5bcbff">Send</button>
                 </div>
             </div>
         </div>
@@ -268,30 +394,21 @@
 
     <div class="modal fade" id="reportModal" tabindex="-1">
         <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content rounded-4 border-0 shadow-lg">
-                <div class="modal-header border-0 bg-danger-subtle text-danger rounded-top-4">
-                    <h5 class="modal-title fw-bold"><i class="bi bi-exclamation-triangle-fill me-2"></i>Report User</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                </div>
+            <div class="modal-content rounded-4 border-0">
                 <div class="modal-body p-4">
-                    <p class="small text-muted mb-3">Please describe why you are reporting this user. Our team will review the chat logs.</p>
-                    <div class="form-floating">
-                        <textarea class="form-control" placeholder="Leave a comment here" id="reportReason" style="height: 120px"></textarea>
-                        <label for="reportReason">Reason for reporting...</label>
-                    </div>
-                </div>
-                <div class="modal-footer border-0 p-3">
-                    <button type="button" class="btn btn-light rounded-pill px-4" data-bs-dismiss="modal">Cancel</button>
-                    <button type="button" class="btn btn-danger rounded-pill px-4" onclick="submitReport()">Submit Report</button>
+                    <h5 class="fw-bold text-danger mb-3">Report User</h5>
+                    <textarea class="form-control mb-3" id="reportReason" placeholder="Reason..."></textarea>
+                    <button onclick="submitReport()" class="btn btn-danger w-100 rounded-pill">Submit</button>
                 </div>
             </div>
         </div>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-app.js";
-        import { getFirestore, collection, addDoc, query, orderBy, onSnapshot, doc, updateDoc, getDoc, deleteDoc, arrayUnion } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-firestore.js";
+        import { getFirestore, collection, addDoc, query, orderBy, onSnapshot, doc, updateDoc, getDoc, deleteDoc, arrayUnion, where, getDocs } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyDrkRtgGhFWSvEiDr5pZy2sGDHI8HCpPt0",
@@ -307,137 +424,269 @@
 
         const params = new URLSearchParams(window.location.search);
         const chatId = params.get("chatId");
-        let partnerName = params.get("name") || "Student";
-        const partnerVibe = params.get("vibe") || "Student";
-        const partnerId = params.get("partnerId");
         const myUid = localStorage.getItem("tempUid");
+
+        let partnerName = params.get("name") || "Student";
+        let activePartnerId = params.get("partnerId");
 
         if(!chatId || !myUid) window.location.href = "/Home/Index";
 
-        document.getElementById("chat-name").innerText = partnerName;
-        document.getElementById("vibe-badge").innerText = partnerVibe;
-        document.getElementById("header-img").src = `https://ui-avatars.com/api/?name=${partnerName}&background=random`;
+        // UI Helpers
+        const setText = (id, text) => { const el = document.getElementById(id); if (el) el.innerText = text; };
+        const setSrc = (id, src) => { const el = document.getElementById(id); if (el) el.src = src; };
 
-        // --- FIX: LOAD REAL INFO (IMAGE AND NAME) ---
+        // Initial Setup
+        setText("chat-name", partnerName);
+        setSrc("header-img", `https://ui-avatars.com/api/?name=${partnerName}&background=random`);
+
+        // --- 1. HEADER LOADER ---
         async function loadHeaderInfo() {
-            let uidToFetch = partnerId;
-            if (!uidToFetch) {
-                 try {
+            try {
+                // If ID is missing OR if ID is erroneously set to MY ID, fix it.
+                if (!activePartnerId || activePartnerId === myUid) {
                      const chatDoc = await getDoc(doc(db, "chats", chatId));
                      if(chatDoc.exists()) {
-                         const participants = chatDoc.data().participants;
-                         uidToFetch = participants.find(p => p !== myUid);
+                         // Find the participant that is NOT me
+                         activePartnerId = chatDoc.data().participants.find(p => p !== myUid);
                      }
-                 } catch(e) { console.log("Could not find partner ID"); }
-            }
-            if (uidToFetch) {
-                try {
-                    const userDoc = await getDoc(doc(db, "users", uidToFetch));
+                }
+
+                if (activePartnerId) {
+                    const userDoc = await getDoc(doc(db, "users", activePartnerId));
                     if (userDoc.exists()) {
                         const data = userDoc.data();
-
-                        // UPDATE IMAGE
-                        if(data.photoURL) document.getElementById("header-img").src = data.photoURL;
-
-                        // UPDATE NAME
+                        if(data.photoURL) setSrc("header-img", data.photoURL);
                         if(data.name) {
                             partnerName = data.name;
-                            document.getElementById("chat-name").innerText = data.name;
+                            setText("chat-name", data.name);
                         }
                     }
-                } catch(e) { console.error(e); }
-            }
+                }
+            } catch(e) { console.error("Header Error:", e); }
         }
         loadHeaderInfo();
 
-        const messagesRef = collection(db, "chats", chatId, "messages");
-        const q = query(messagesRef, orderBy("createdAt", "asc"));
+        // --- 2. SIDEBAR LIST ---
+        async function loadSidebarChats() {
+            const sidebarList = document.getElementById("sidebar-list");
+            const q = query(collection(db, "chats"), where("participants", "array-contains", myUid));
 
-        onSnapshot(q, (snapshot) => {
+            onSnapshot(q, (snapshot) => {
+                const chatsData = [];
+                snapshot.forEach(doc => { const d = doc.data(); d.id = doc.id; chatsData.push(d); });
+                chatsData.sort((a, b) => new Date(b.lastMessageTime || 0) - new Date(a.lastMessageTime || 0));
+
+                let html = "";
+                chatsData.forEach(chat => {
+                    if(!chat.participants || chat.participants.length < 2) return;
+                    const otherId = chat.participants.find(id => id !== myUid);
+                    let displayName = (chat.participantNames && chat.participantNames[otherId]) || "User";
+                    let displayImg = `https://ui-avatars.com/api/?name=${displayName}&background=random`;
+                    const isActive = chat.id === chatId ? "active" : "";
+
+                    html += `
+                        <a href="/Home/Messages?chatId=${chat.id}&name=${encodeURIComponent(displayName)}&partnerId=${otherId}" class="chat-item ${isActive}">
+                            <img src="${displayImg}" class="chat-item-avatar shadow-sm needs-photo" data-userid="${otherId}">
+                            <div style="overflow:hidden;">
+                                <div class="fw-bold text-dark text-truncate">${displayName}</div>
+                                <div class="small text-muted text-truncate">${chat.lastMessage || "No messages yet"}</div>
+                            </div>
+                        </a>`;
+                });
+
+                if(sidebarList) sidebarList.innerHTML = html || `<div class="text-center mt-5 text-muted"><small>No chats found.</small></div>`;
+
+                // Lazy Load Photos
+                document.querySelectorAll('.needs-photo').forEach(async (img) => {
+                    const uid = img.dataset.userid;
+                    try {
+                        const snap = await getDoc(doc(db, "users", uid));
+                        if(snap.exists() && snap.data().photoURL) img.src = snap.data().photoURL;
+                    } catch(e) {}
+                });
+            });
+        }
+        loadSidebarChats();
+
+        // --- 3. OPEN PROFILE (THE LOGIC FIX IS HERE) ---
+        window.openPartnerProfile = async () => {
+            console.log("Opening profile...");
+
+            // CRITICAL FIX: Ensure we are not comparing Self vs Self
+            if (!activePartnerId || activePartnerId === myUid) {
+                console.log("Fixing ID mismatch...");
+                try {
+                    const chatDoc = await getDoc(doc(db, "chats", chatId));
+                    if(chatDoc.exists()) {
+                        // FORCE finding the OTHER person
+                        const parts = chatDoc.data().participants;
+                        activePartnerId = parts.find(p => p !== myUid);
+                        console.log("Found correct partner ID:", activePartnerId);
+                    }
+                } catch(e) { console.error(e); }
+            }
+
+            if (!activePartnerId) return alert("Loading data... please click again.");
+
+            try {
+                const [partnerSnap, mySnap] = await Promise.all([
+                    getDoc(doc(db, "users", activePartnerId)),
+                    getDoc(doc(db, "users", myUid))
+                ]);
+
+                if (partnerSnap.exists()) {
+                    const data = partnerSnap.data(); // Them
+                    const myData = mySnap.exists() ? mySnap.data() : {}; // You
+
+                    // --- CALCULATION LOGIC ---
+                    console.log("Calculating match between:", myData.name, "and", data.name);
+
+                    let score = 0;
+
+                    // 1. VIBE (+40%)
+                    if (myData.studyVibe && data.studyVibe && myData.studyVibe === data.studyVibe) {
+                        score += 40;
+                    }
+
+                    // 2. PROGRAM (+30%)
+                    if (myData.program && data.program && myData.program === data.program) {
+                        score += 30;
+                    }
+
+                    // 3. REGION (+10%)
+                    if (myData.region && data.region && myData.region === data.region) {
+                        score += 10;
+                    }
+
+                    // 4. SKILLS (+20%)
+                    const mySkills = myData.skills || [];
+                    const theirSkills = data.skills || [];
+                    if (mySkills.length > 0 && theirSkills.length > 0) {
+                        const mySubs = mySkills.map(s => s.subject);
+                        const theirSubs = theirSkills.map(s => s.subject);
+                        if (mySubs.some(s => theirSubs.includes(s))) score += 20;
+                    }
+
+                    // Fallback
+                    if (score === 0) score = 10;
+
+                    // --- UPDATE UI ---
+                    setText("match-badge", `${score}% Match`);
+
+                    // 1. BADGE COLOR LOGIC
+                    const badge = document.getElementById("match-badge");
+                    if(badge) {
+                        // We remove old classes and add our new Custom CSS classes
+                        badge.className = "badge rounded-pill mt-2 px-3 shadow-sm " +
+                                          (score >= 80 ? "badge-high-match" :
+                                           score >= 50 ? "badge-mid-match" : "badge-low-match");
+                    }
+
+                    setText("raw-name", data.name || "Student");
+                    setText("raw-program", data.program || "N/A");
+                    setText("raw-year", data.yearLevel || "");
+                    setText("raw-vibe", (data.studyVibe || "General") + " Vibe");
+                    setText("raw-bio", data.bio || "No bio.");
+
+                    // 2. PROFILE PICTURE (DP) FALLBACK
+                    // If they have a photo, use it. IF NOT, generate one using their name.
+                    if(data.photoURL) {
+                        setSrc("raw-img", data.photoURL);
+                    } else {
+                        setSrc("raw-img", `https://ui-avatars.com/api/?name=${data.name || 'User'}&background=random`);
+                    }
+
+                    // Skills
+                    const skillsBox = document.getElementById("raw-skills");
+                    if(skillsBox) {
+                        skillsBox.innerHTML = "";
+                        if (data.skills && data.skills.length > 0) {
+                            data.skills.forEach(s => skillsBox.innerHTML += `<span class="badge bg-secondary-subtle text-secondary-emphasis border border-secondary-subtle fw-normal me-1">${s.subject}</span>`);
+                        } else { skillsBox.innerHTML = "<small class='text-muted'>No subjects.</small>"; }
+                    }
+
+                    // Schedule
+                    const schedBox = document.getElementById("raw-schedule");
+                    if(schedBox) {
+                        schedBox.innerHTML = "";
+                        const sched = data.availabilityDetails || [];
+                        sched.forEach(slot => {
+                            let start = formatTo12Hour(slot.startTime);
+                            let end = formatTo12Hour(slot.endTime);
+                            let time = ((!start && !end) || (slot.startTime === "00:00")) ? "Anytime" : `${start} - ${end}`;
+                            schedBox.innerHTML += `<div class="d-flex justify-content-between px-3 py-2 border-bottom last-border-0 bg-light-subtle"><span class="fw-bold small text-dark">${slot.day}</span><span class="small text-muted">${time}</span></div>`;
+                        });
+                        if(sched.length === 0) schedBox.innerHTML = "<div class='p-3 small text-muted text-center'>Flexible.</div>";
+                    }
+
+                    new bootstrap.Modal(document.getElementById('partnerProfileModal')).show();
+                }
+            } catch (error) { console.error("Profile Error:", error); }
+        }
+
+        // --- 4. MESSAGES ---
+        const messagesRef = collection(db, "chats", chatId, "messages");
+        const qMsg = query(messagesRef);
+
+        onSnapshot(qMsg, (snapshot) => {
             const messageList = document.getElementById("message-list");
             const icebreakers = document.getElementById("icebreakers");
             const scrollContainer = document.getElementById("scroll-container");
 
-            messageList.innerHTML = "";
-            if (snapshot.empty) {
-                icebreakers.style.display = "block";
+            let allMessages = [];
+            snapshot.forEach((doc) => allMessages.push(doc.data()));
+            allMessages.sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
+
+            if(messageList) messageList.innerHTML = "";
+
+            if (allMessages.length === 0) {
+                if(icebreakers) icebreakers.style.display = "block";
             } else {
-                icebreakers.style.display = "none";
-                snapshot.forEach((doc) => {
-                    const msg = doc.data();
+                if(icebreakers) icebreakers.style.display = "none";
+                let lastTime = null;
+                allMessages.forEach((msg) => {
+                    const msgDate = new Date(msg.createdAt);
+                    if (!lastTime || (msgDate - lastTime) > (20 * 60 * 1000)) {
+                        const separator = document.createElement("div");
+                        separator.className = "date-separator";
+                        separator.innerText = formatDateHeader(msgDate);
+                        messageList.appendChild(separator);
+                    }
+                    lastTime = msgDate;
                     renderMessage(msg, msg.senderId === myUid ? "me" : "them");
                 });
-                scrollContainer.scrollTop = scrollContainer.scrollHeight;
+                if(scrollContainer) scrollContainer.scrollTop = scrollContainer.scrollHeight;
             }
         });
 
+        // --- UTILS ---
+        function formatTo12Hour(timeStr) {
+            if (!timeStr) return null;
+            let [h, m] = timeStr.split(':');
+            if (!m) m = "00"; h = parseInt(h, 10);
+            if (isNaN(h)) return null;
+            const ampm = h >= 12 ? 'PM' : 'AM';
+            h = h % 12 || 12;
+            return `${h}:${m} ${ampm}`;
+        }
+
+        function formatDateHeader(date) {
+            return date.toLocaleDateString([], { month: 'short', day: 'numeric', hour: '2-digit', minute:'2-digit' });
+        }
+
         function renderMessage(msg, type) {
             const messageList = document.getElementById("message-list");
+            if(!messageList) return;
             const div = document.createElement("div");
             div.className = `message-row ${type}`;
-            let contentHtml = "";
-
-            if (msg.type === "file") {
-                contentHtml = `
-                    <div class="message-bubble shadow-sm">
-                        <a href="${msg.fileData}" download="${msg.fileName}" class="file-msg">
-                            <i class="bi bi-file-earmark-arrow-down-fill file-icon"></i>
-                            <div>
-                                <div class="file-tag">${msg.fileTag || "General"}</div>
-                                <div class="fw-bold" style="font-size:13px;">${msg.fileName}</div>
-                                <div style="font-size:11px; opacity:0.8;">Click to Download</div>
-                            </div>
-                        </a>
-                    </div>`;
-            } else {
-                contentHtml = `<div class="message-bubble shadow-sm">${msg.text}</div>`;
-            }
-            div.innerHTML = `${contentHtml}<span class="meta ${type === 'me' ? 'text-end' : ''}">${msg.time}</span>`;
+            let content = msg.type === "file" ?
+                `<div class="message-bubble shadow-sm bg-light text-dark border"><a href="${msg.fileData}" download="${msg.fileName}" style="text-decoration:none; color:inherit; display:flex; align-items:center; gap:10px;"><i class="bi bi-file-earmark-arrow-down-fill fs-3 text-primary"></i><div><div class="fw-bold small">${msg.fileName}</div><span class="badge bg-secondary" style="font-size:9px;">FILE</span></div></a></div>`
+                : `<div class="message-bubble shadow-sm">${msg.text}</div>`;
+            div.innerHTML = `${content}<span class="meta ${type === 'me' ? 'text-end' : ''}">${msg.time}</span>`;
             messageList.appendChild(div);
         }
 
-        window.deleteConversation = async () => {
-            if (confirm("Are you sure you want to delete this conversation? This cannot be undone.")) {
-                try {
-                    await deleteDoc(doc(db, "chats", chatId));
-                    alert("Conversation deleted.");
-                    window.location.href = "/Home/Index";
-                } catch (error) { console.error(error); alert("Could not delete conversation."); }
-            }
-        }
-
-        window.openReportModal = () => { new bootstrap.Modal(document.getElementById('reportModal')).show(); }
-
-        window.submitReport = async () => {
-            const reason = document.getElementById("reportReason").value.trim();
-            if (!reason) return alert("Please enter a reason.");
-            try {
-                await addDoc(collection(db, "reports"), { reporterId: myUid, reportedChatId: chatId, reportedName: partnerName, reason: reason, timestamp: new Date().toISOString() });
-                const modal = bootstrap.Modal.getInstance(document.getElementById('reportModal'));
-                modal.hide();
-                alert("Thanks for letting us know. We've received your report.");
-                document.getElementById("reportReason").value = "";
-            } catch (error) { console.error("Error reporting:", error); alert("Failed to send report."); }
-        }
-
-        window.blockUser = async () => {
-            if (confirm(`Are you sure you want to block ${partnerName}? You won't see them again.`)) {
-                try {
-                    let uidToBlock = partnerId;
-                    if(!uidToBlock) {
-                         const chatDoc = await getDoc(doc(db, "chats", chatId));
-                         if(chatDoc.exists()) { uidToBlock = chatDoc.data().participants.find(p => p !== myUid); }
-                    }
-                    if(uidToBlock) {
-                        const myRef = doc(db, "users", myUid);
-                        await updateDoc(myRef, { blockedUsers: arrayUnion(uidToBlock) });
-                        alert(`${partnerName} has been blocked.`);
-                        window.location.href = "/Home/Index";
-                    } else { alert("Error finding user to block."); }
-                } catch (error) { console.error(error); alert("Failed to block user."); }
-            }
-        }
-
+        // --- SEND & UPLOAD ---
         window.sendMessage = async () => {
             const input = document.getElementById("messageInput");
             const text = input.value.trim();
@@ -445,16 +694,15 @@
             input.value = "";
             await saveToDB(text, "text");
         }
-
         window.sendStarter = async (text) => { await saveToDB(text, "text"); }
+        window.handleEnter = (e) => { if(e.key === "Enter") sendMessage(); }
 
         window.handleFileUpload = () => {
             const fileInput = document.getElementById('fileInput');
             const subjectSelect = document.getElementById('subjectSelect');
-            if (fileInput.files.length === 0) return alert("Select a file!");
+            if (fileInput.files.length === 0) return alert("Select file!");
             const file = fileInput.files[0];
             const subject = subjectSelect.value;
-            if (file.size > 1000000) return alert("File too big! Firestore limit is 1MB.");
             const reader = new FileReader();
             reader.onload = async function(e) {
                 const base64 = e.target.result;
@@ -468,14 +716,24 @@
 
         async function saveToDB(text, type, extraData = {}) {
             const timeString = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-            try {
-                await addDoc(messagesRef, { text: text, senderId: myUid, createdAt: new Date().toISOString(), time: timeString, type: type, ...extraData });
-                const chatDocRef = doc(db, "chats", chatId);
-                await updateDoc(chatDocRef, { lastMessage: text, lastMessageTime: new Date().toISOString() });
-            } catch (e) { console.error("Send error:", e); alert("Failed to send."); }
+            await addDoc(messagesRef, { text, senderId: myUid, createdAt: new Date().toISOString(), time: timeString, type, ...extraData });
+            await updateDoc(doc(db, "chats", chatId), { lastMessage: text, lastMessageTime: new Date().toISOString() });
         }
 
-        window.handleEnter = (e) => { if(e.key === "Enter") sendMessage(); }
+        window.filterChats = () => {
+            const input = document.getElementById("searchInput");
+            const filter = input.value.toLowerCase();
+            const list = document.getElementById("sidebar-list");
+            if(!list) return;
+            const items = list.getElementsByClassName("chat-item");
+            for (let i = 0; i < items.length; i++) {
+                const nameEl = items[i].querySelector(".fw-bold");
+                const textValue = nameEl.innerText.toLowerCase();
+                items[i].style.display = textValue.indexOf(filter) > -1 ? "flex" : "none";
+            }
+        }
+
+        window.openReportModal = () => new bootstrap.Modal(document.getElementById('reportModal')).show();
     </script>
 </body>
 </html>

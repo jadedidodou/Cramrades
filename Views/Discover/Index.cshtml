@@ -15,11 +15,17 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
     <style>
         body {
-            background-color: #f0f2f5;
-            font-family: 'Segoe UI', sans-serif;
+            background-color: #ffffff;
+            font-family: 'Lexend', sans-serif; 
             height: 100vh;
             display: flex;
             flex-direction: column;
+            color: #170007;
+            background-image: url('/images/background.png');
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed; 
+            background-repeat: no-repeat;
         }
 
         .main-container {
@@ -31,9 +37,9 @@
         }
 
         .profile-card {
-            width: 100%;
-            max-width: 400px;
-            background: white;
+            width: 400px;
+            max-width: 900px;
+            background: #fffcf8;
             border-radius: 20px;
             box-shadow: 0 10px 30px rgba(0,0,0,0.1);
             overflow: hidden;
@@ -42,7 +48,7 @@
         }
 
         .card-img-top {
-            height: 280px;
+            height: 250px; 
             object-fit: cover;
             background: #ddd;
         }
@@ -51,77 +57,80 @@
             position: absolute;
             top: 20px;
             right: 20px;
-            background: rgba(13, 110, 253, 0.9);
-            color: white;
-            padding: 5px 12px;
-            border-radius: 20px;
-            font-weight: bold;
-            font-size: 14px;
+            background: rgba(255, 255, 255, 0.95);
+            color: #170007;
+            padding: 8px 16px;
+            border-radius: 30px;
+            font-weight: 800;
+            font-size: 16px;
             backdrop-filter: blur(5px);
-            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.15);
+            z-index: 10;
         }
 
         .match-reasons {
             background: #f8f9fa;
             border-radius: 12px;
-            padding: 15px;
+            padding: 12px;
             font-size: 13px;
             color: #495057;
             margin-bottom: 15px;
             border: 1px solid #e9ecef;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
         }
 
-        .match-reason-item {
+        .reason-tag {
+            background: #eef2ff;
+            color: #4f46e5;
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-weight: 600;
+            font-size: 12px;
             display: flex;
             align-items: center;
-            gap: 10px;
-            margin-bottom: 6px;
-            font-weight: 600;
+            gap: 5px;
         }
-
-            .match-reason-item i {
-                color: #0d6efd;
-                font-size: 16px;
-            }
 
         .action-buttons {
             display: flex;
-            gap: 15px;
-            padding: 15px;
+            gap: 20px;
+            padding: 20px;
             justify-content: center;
             background: white;
-            border-top: 1px solid #f0f0f0;
         }
 
         .btn-action {
-            width: 55px;
-            height: 55px;
+            width: 60px;
+            height: 60px;
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 22px;
+            font-size: 26px;
             transition: 0.2s;
             border: none;
+            cursor: pointer;
         }
 
         .btn-pass {
-            background: #fee;
-            color: #ff4b4b;
+            background: #fee2e2;
+            color: #ef4444;
         }
 
             .btn-pass:hover {
-                background: #fcc;
+                background: #fecaca;
                 transform: scale(1.1);
             }
 
         .btn-connect {
-            background: #eef;
-            color: #0d6efd;
+            background: #e0e7ff;
+            color: #48B584;
         }
 
             .btn-connect:hover {
-                background: #ccf;
+                background: #E8FFF6;
                 transform: scale(1.1);
             }
 
@@ -139,10 +148,23 @@
 </head>
 <body>
 
-    <nav class="navbar navbar-expand-lg bg-white border-bottom px-4 py-2">
-        <a class="navbar-brand fw-bold text-primary" href="/Home/Index">Cramrades</a>
+    <nav class="navbar navbar-expand-lg bg-white border-bottom px-4 py-2 sticky-top">
+        
+        <a class="navbar-brand d-flex align-items-center" href="/Home/Index">
+            <img src="/images/cramrades logo.png"
+                 alt="Cramrades Logo"
+                 style="height: 40px; width: auto; object-fit: contain;"
+                 class="me-2">
+
+            <span style="font-family: 'Fredoka', sans-serif; font-weight: bold; font-size: 35px; color: #ffa4c0;">
+                Cramrades
+            </span>
+        </a>
+
         <div class="ms-auto">
-            <a href="/Home/Index" class="btn btn-sm btn-outline-secondary rounded-pill">Back to Dashboard</a>
+            <a href="/Home/Index" class="btn btn-sm ">
+                <i class="bi bi-house-door-fill" style="color: #48B584; font-size: 28px;"></i>
+            </a>
         </div>
     </nav>
 
@@ -150,34 +172,34 @@
 
         <div id="loading" class="text-center">
             <div class="spinner-border text-primary mb-3"></div>
-            <h5 class="text-muted">Calculating compatibility...</h5>
+            <h5 class="text-muted">Finding your study partners...</h5>
         </div>
 
         <div id="no-matches" class="text-center" style="display: none;">
-            <div class="mb-3" style="font-size: 50px;">😴</div>
-            <h4>No high matches found!</h4>
+            <div class="mb-3" style="font-size: 60px;">🏁</div>
+            <h4 class="fw-bold">That's everyone!</h4>
             <p class="text-muted" style="max-width: 300px; margin: 0 auto;">
-                We only show students with <strong>50%+ compatibility</strong>. Try updating your profile to match with more people.
+                You've seen all the active students for now. Check back later!
             </p>
-            <a href="/Home/Index" class="btn btn-primary rounded-pill mt-3">Go Home</a>
+            <a href="/Home/Index" class="btn btn-primary rounded-pill mt-4 px-4">Back to Home</a>
         </div>
 
         <div id="card-container" style="display: none;">
             <div class="profile-card" id="current-card">
 
                 <div class="compatibility-badge">
-                    <i class="bi bi-stars"></i> <span id="score-display">0%</span> Match
+                    <span id="score-display">0%</span>
                 </div>
 
                 <img id="card-img" class="card-img-top" src="" alt="Profile">
 
-                <div class="p-4 pb-0">
+                <div class="p-4">
                     <h3 class="fw-bold mb-1" id="card-name">Student Name</h3>
                     <p class="text-primary fw-bold small mb-3" id="card-course">Course • Year</p>
 
                     <div class="match-reasons" id="reasons-container"></div>
 
-                    <p class="text-muted small mb-3" id="card-bio">Bio goes here...</p>
+                    <p class="text-muted small mb-0" id="card-bio" style="line-height: 1.6;">Bio goes here...</p>
                 </div>
 
                 <div class="action-buttons">
@@ -185,7 +207,7 @@
                         <i class="bi bi-x-lg"></i>
                     </button>
                     <button class="btn-action btn-connect shadow-sm" onclick="connectUser()">
-                        <i class="bi bi-chat-heart-fill"></i>
+                        <i class="bi bi-chat-fill"></i>
                     </button>
                 </div>
             </div>
@@ -194,7 +216,6 @@
     </div>
 
     <script type="module">
-        // 1. IMPORT EVERYTHING PROPERLY
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-app.js";
         import { getFirestore, collection, getDocs, doc, getDoc, setDoc, query, where } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-firestore.js";
 
@@ -210,67 +231,56 @@
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
 
-        // GLOBAL VARIABLES
-        const myUid = localStorage.getItem("tempUid"); // Only declare once here!
+        const myUid = localStorage.getItem("tempUid");
         let matches = [];
         let currentIndex = 0;
         let myProfile = {};
-        const MIN_SCORE_THRESHOLD = 50;
 
         async function initDiscover() {
-            console.log("Checking session for UID:", myUid);
-            if(!myUid) {
-                window.location.href = "/Auth/Login";
-                return;
-            }
+            if(!myUid) { window.location.href = "/Auth/Login"; return; }
 
             try {
-                // STEP A: Get My Profile
+                // 1. Get My Profile
                 const mySnap = await getDoc(doc(db, "users", myUid));
-                if(mySnap.exists()) {
-                    myProfile = mySnap.data();
-                } else {
-                    console.error("My profile not found in DB!");
-                }
+                if(mySnap.exists()) { myProfile = mySnap.data(); }
+                else { alert("Profile error"); return; }
 
-                // STEP B: Build Ignore List (Matches + Myself)
-                const ignoredIds = new Set();
-                ignoredIds.add(myUid); // <--- SELF-MATCH FIX
-
+                // 2. Get Ignore List (Existing Chats + Self)
+                const ignoredIds = new Set([myUid]);
                 const qChats = query(collection(db, "chats"), where("participants", "array-contains", myUid));
                 const chatSnaps = await getDocs(qChats);
-                chatSnaps.forEach(chatDoc => {
-                    const data = chatDoc.data();
-                    if(data.participants) {
-                        data.participants.forEach(p => ignoredIds.add(p));
-                    }
+                chatSnaps.forEach(chat => {
+                   const parts = chat.data().participants;
+                   if(parts) parts.forEach(p => ignoredIds.add(p));
                 });
 
-                // STEP C: Get All Users & Filter
+                // 3. Get Candidates
                 const querySnapshot = await getDocs(collection(db, "users"));
                 let tempUsers = [];
 
                 querySnapshot.forEach((userDoc) => {
                     const user = userDoc.data();
-                    const otherUid = userDoc.id; // Use Doc ID as UID
+                    const otherUid = userDoc.id;
 
-                    // FIX: Must not be me AND must have profile completed
-                    if (otherUid !== myUid && !ignoredIds.has(otherUid) && user.profileCompleted === true) {
+                    // Filter: Must check ignore list AND profileCompleted
+                    if (!ignoredIds.has(otherUid) && user.profileCompleted === true) {
+
                         const result = calculateCompatibility(user, myProfile);
+
                         user.score = result.score;
                         user.reasons = result.reasons;
                         user.uid = otherUid;
 
-                        if (user.score >= MIN_SCORE_THRESHOLD) {
-                            tempUsers.push(user);
-                        }
+                        // PUSH EVERYONE (No threshold filtering)
+                        tempUsers.push(user);
                     }
                 });
 
-                // STEP D: Update UI
+                // 4. SORT BY SCORE (Highest First)
                 matches = tempUsers.sort((a, b) => b.score - a.score);
-                document.getElementById("loading").style.display = "none";
 
+                // 5. Render
+                document.getElementById("loading").style.display = "none";
                 if (matches.length > 0) {
                     document.getElementById("card-container").style.display = "block";
                     renderCard(matches[0]);
@@ -279,62 +289,86 @@
                 }
 
             } catch (error) {
-                console.error("Discovery error:", error);
-                document.getElementById("loading").innerHTML = `<p class="text-danger">Error loading matches. Check F12 console.</p>`;
+                console.error("Error:", error);
             }
         }
 
-        // --- COMPATIBILITY LOGIC ---
         function calculateCompatibility(them, me) {
             let score = 0;
             let reasons = [];
 
-            if (them.program === me.program) { score += 20; reasons.push(`📚 Both in ${me.program}`); }
-            if (them.studyVibe === me.studyVibe) { score += 20; reasons.push(`✨ Both like ${me.studyVibe} Vibe`); }
+            // 1. VIBE (40%)
+            if (them.studyVibe && me.studyVibe && them.studyVibe === me.studyVibe) {
+                score += 40;
+                reasons.push(`✨ Same Vibe (${me.studyVibe})`);
+            }
 
-            // Subject Matching
+            // 2. PROGRAM (30%)
+            if (them.program && me.program && them.program === me.program) {
+                score += 30;
+                reasons.push(`📚 Same Program (${me.program})`);
+            }
+
+            // 3. SUBJECTS (20%)
             if (me.skills && them.skills) {
                 const mySubs = me.skills.map(s => s.subject);
                 const theirSubs = them.skills.map(s => s.subject);
                 const common = mySubs.filter(s => theirSubs.includes(s));
                 if (common.length > 0) {
-                    score += (common.length * 10);
-                    reasons.push(`🧠 Both studying ${common[0]}`);
+                    score += 20;
+                    reasons.push(`🧠 Shared Subject: ${common[0]}`);
                 }
             }
 
-            if (them.location === me.location) { score += 10; reasons.push(`📍 Both from ${me.location}`); }
+            // 4. REGION (10%)
+            if (them.region && me.region && them.region === me.region) {
+                score += 10;
+                reasons.push(`📍 Near ${me.region}`);
+            }
 
-            // Preference Logic
-            if (me.preference !== "Everyone" && me.preference !== them.gender) score -= 100;
+            // 5. FALLBACK (10%)
+            if (score === 0) {
+                score = 10;
+                reasons.push(`🎓 Fellow Student`);
+            }
 
-            return { score: Math.min(100, Math.max(0, score)), reasons };
+            return { score: score, reasons: reasons };
         }
 
         function renderCard(user) {
             document.getElementById("card-name").innerText = user.name || "Student";
             document.getElementById("card-course").innerText = (user.program || "Course") + " • " + (user.yearLevel || "Year");
             document.getElementById("card-bio").innerText = user.bio || "No bio yet.";
-            document.getElementById("score-display").innerText = user.score + "%";
 
-            const imgEl = document.getElementById("card-img");
-            imgEl.src = user.photoURL || `https://ui-avatars.com/api/?name=${encodeURIComponent(user.name || 'User')}&background=random&size=400`;
+            // Score Color Logic
+            const badge = document.getElementById("score-display");
+            badge.innerText = user.score + "% Match";
+            if(user.score >= 70) badge.style.color = "#198754"; // Green
+            else if(user.score >= 40) badge.style.color = "#0d6efd"; // Blue
+            else badge.style.color = "#6c757d"; // Grey
 
+            // Image
+            document.getElementById("card-img").src = user.photoURL || `https://ui-avatars.com/api/?name=${encodeURIComponent(user.name || 'User')}&background=random&size=400`;
+
+            // Reasons
             const reasonsDiv = document.getElementById("reasons-container");
             reasonsDiv.innerHTML = "";
-            user.reasons.slice(0, 4).forEach(r => {
-                reasonsDiv.innerHTML += `<div class="match-reason-item"><i class="bi bi-check-circle-fill"></i> ${r}</div>`;
+            user.reasons.forEach(r => {
+                reasonsDiv.innerHTML += `<div class="reason-tag">${r}</div>`;
             });
         }
 
+        // SWIPE ACTIONS
         window.passUser = () => {
             const card = document.getElementById("current-card");
             card.classList.add("fade-out-left");
+
             setTimeout(() => {
                 card.classList.remove("fade-out-left");
                 currentIndex++;
-                if (currentIndex < matches.length) renderCard(matches[currentIndex]);
-                else {
+                if (currentIndex < matches.length) {
+                    renderCard(matches[currentIndex]);
+                } else {
                     document.getElementById("card-container").style.display = "none";
                     document.getElementById("no-matches").style.display = "block";
                 }
@@ -346,18 +380,16 @@
             const btn = document.querySelector(".btn-connect");
             btn.innerHTML = `<span class="spinner-border spinner-border-sm"></span>`;
 
-            const partnerName = user.name || "Student";
             const chatId = [myUid, user.uid].sort().join("_");
-
             try {
                 await setDoc(doc(db, "chats", chatId), {
                     participants: [myUid, user.uid],
-                    participantNames: { [myUid]: myProfile.name || "Me", [user.uid]: partnerName },
-                    lastMessage: "Started a new connection! 👋",
+                    participantNames: { [myUid]: myProfile.name || "Me", [user.uid]: user.name },
+                    lastMessage: "Started a connection! 👋",
                     lastMessageTime: new Date().toISOString()
                 }, { merge: true });
 
-                window.location.href = `/Home/Messages?chatId=${chatId}&name=${encodeURIComponent(partnerName)}`;
+                window.location.href = `/Home/Messages?chatId=${chatId}&name=${encodeURIComponent(user.name)}`;
             } catch (e) {
                 console.error(e);
                 alert("Connection failed.");

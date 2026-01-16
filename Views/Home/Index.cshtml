@@ -286,7 +286,7 @@
                 const querySnapshot = await getDocs(q);
 
                 if (querySnapshot.empty) {
-                    container.innerHTML = `<div class="text-center py-5 text-muted"><i class="bi bi-chat-dots fs-1"></i><p class="mt-2">No active chats. Go find a partner!</p><a href="/Discover" class="btn btn-primary rounded-pill">Find Partner</a></div>`;
+                    container.innerHTML = `<div class="text-center py-5 text-muted"><i class="bi bi-chat-dots fs-1"></i><p class="mt-2">No active chats. Go find a partner!</p><a href="/Discover" class="btn rounded-pill" style="background-color: #5bcbff">Find Partner</a></div>`;
                     return;
                 }
 

@@ -257,6 +257,12 @@
             border: 1px solid #f5c6cb;
         }
 
+        .blocked-footer {
+            opacity: 0.5;
+            pointer-events: none; 
+            background-color: #e9ecef !important;
+        }
+
         @@media (max-width: 768px) {
             .sidebar {
                 display: none;
@@ -306,12 +312,26 @@
                     </div>
 
                     <div class="dropdown ms-auto">
-                        <button class="btn-menu" type="button" data-bs-toggle="dropdown"><i class="bi bi-three-dots-vertical fs-5"></i></button>
+                        <button class="btn-menu" type="button" data-bs-toggle="dropdown">
+                            <i class="bi bi-three-dots-vertical fs-5"></i>
+                        </button>
                         <ul class="dropdown-menu dropdown-menu-end shadow border-0 rounded-4">
-                            <li><button class="dropdown-item text-danger" onclick="deleteConversation()"><i class="bi bi-trash"></i> Delete Conversation</button></li>
-                            <li><button class="dropdown-item" onclick="openReportModal()"><i class="bi bi-flag"></i> Report User</button></li>
+                            <li>
+                                <button class="dropdown-item text-danger" onclick="confirmDeleteChat()">
+                                    <i class="bi bi-trash me-2"></i> Delete Conversation
+                                </button>
+                            </li>
+                            <li>
+                                <button class="dropdown-item" onclick="openReportModal()">
+                                    <i class="bi bi-flag me-2"></i> Report User
+                                </button>
+                            </li>
                             <li><hr class="dropdown-divider"></li>
-                            <li><button class="dropdown-item text-danger fw-bold" onclick="blockUser()"><i class="bi bi-slash-circle"></i> Block User</button></li>
+                            <li>
+                                <button class="dropdown-item text-dark fw-bold" onclick="confirmBlockUser()" id="btn-block-toggle">
+                                    <i class="bi bi-slash-circle me-2"></i> Block User
+                                </button>
+                            </li>
                         </ul>
                     </div>
                 </div>
@@ -392,6 +412,42 @@
         </div>
     </div>
 
+    <div class="modal fade" id="deleteConfirmModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered modal-sm">
+            <div class="modal-content border-0 shadow rounded-4">
+                <div class="modal-body p-4 text-center">
+                    <div class="bg-danger-subtle text-danger rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style="width: 60px; height: 60px;">
+                        <i class="bi bi-trash3-fill fs-3"></i>
+                    </div>
+                    <h5 class="fw-bold mb-2">Delete Chat?</h5>
+                    <p class="text-muted small mb-4">This will permanently remove this conversation for you. This cannot be undone.</p>
+                    <div class="d-grid gap-2">
+                        <button type="button" class="btn btn-danger rounded-pill fw-bold" onclick="executeDelete()">Yes, Delete it</button>
+                        <button type="button" class="btn btn-light rounded-pill fw-bold" data-bs-dismiss="modal">Cancel</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="blockConfirmModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered modal-sm">
+            <div class="modal-content border-0 shadow rounded-4">
+                <div class="modal-body p-4 text-center">
+                    <div class="bg-dark-subtle text-dark rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style="width: 60px; height: 60px;">
+                        <i class="bi bi-slash-circle fs-3"></i>
+                    </div>
+                    <h5 class="fw-bold mb-2" id="blockModalTitle">Block User?</h5>
+                    <p class="text-muted small mb-4" id="blockModalText">You won't receive messages from them anymore.</p>
+                    <div class="d-grid gap-2">
+                        <button type="button" class="btn btn-dark rounded-pill fw-bold" onclick="executeBlockToggle()" id="blockModalBtn">Yes, Block</button>
+                        <button type="button" class="btn btn-light rounded-pill fw-bold" data-bs-dismiss="modal">Cancel</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <div class="modal fade" id="reportModal" tabindex="-1">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content rounded-4 border-0">
@@ -408,7 +464,7 @@
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-app.js";
-        import { getFirestore, collection, addDoc, query, orderBy, onSnapshot, doc, updateDoc, getDoc, deleteDoc, arrayUnion, where, getDocs } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-firestore.js";
+        import { getFirestore, collection, addDoc, query, orderBy, where, doc, getDoc, updateDoc, deleteDoc, arrayUnion, arrayRemove, onSnapshot } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyDrkRtgGhFWSvEiDr5pZy2sGDHI8HCpPt0",
@@ -429,6 +485,9 @@
         let partnerName = params.get("name") || "Student";
         let activePartnerId = params.get("partnerId");
 
+        // --- GLOBAL STATE FOR BLOCKING ---
+        let isBlocked = false; // Tracks if current partner is blocked
+
         if(!chatId || !myUid) window.location.href = "/Home/Index";
 
         // UI Helpers
@@ -439,30 +498,172 @@
         setText("chat-name", partnerName);
         setSrc("header-img", `https://ui-avatars.com/api/?name=${partnerName}&background=random`);
 
-        // --- 1. HEADER LOADER ---
+        // --- 1. UPDATED HEADER LOADER (Now checks Block Status) ---
         async function loadHeaderInfo() {
             try {
-                // If ID is missing OR if ID is erroneously set to MY ID, fix it.
-                if (!activePartnerId || activePartnerId === myUid) {
-                     const chatDoc = await getDoc(doc(db, "chats", chatId));
-                     if(chatDoc.exists()) {
-                         // Find the participant that is NOT me
-                         activePartnerId = chatDoc.data().participants.find(p => p !== myUid);
-                     }
-                }
+                // ... (Keep your existing ID finding logic here) ...
+                if (!activePartnerId) { /* ... logic to find ID ... */ }
 
                 if (activePartnerId) {
                     const userDoc = await getDoc(doc(db, "users", activePartnerId));
                     if (userDoc.exists()) {
                         const data = userDoc.data();
-                        if(data.photoURL) setSrc("header-img", data.photoURL);
+                        // ... (Update Name/Photo logic) ...
                         if(data.name) {
                             partnerName = data.name;
                             setText("chat-name", data.name);
                         }
                     }
+
+                    // --- NEW: CHECK IF BLOCKED ---
+                    checkBlockStatus();
                 }
             } catch(e) { console.error("Header Error:", e); }
+        }
+
+        // --- 2. CHECK BLOCK STATUS ---
+        async function checkBlockStatus() {
+            try {
+                const myDoc = await getDoc(doc(db, "users", myUid));
+                if (myDoc.exists()) {
+                    const myData = myDoc.data();
+                    const blockedList = myData.blockedUsers || [];
+
+                    isBlocked = blockedList.includes(activePartnerId);
+
+                    // A. Update Dropdown Text
+                    const btn = document.getElementById("btn-block-toggle");
+                    if(btn) {
+                        btn.innerHTML = isBlocked
+                            ? `<i class="bi bi-check-circle me-2"></i> Unblock User`
+                            : `<i class="bi bi-slash-circle me-2"></i> Block User`;
+                        btn.className = isBlocked ? "dropdown-item text-success fw-bold" : "dropdown-item text-dark fw-bold";
+                    }
+
+                    // B. UPDATE CHAT INPUTS 
+                    const footer = document.querySelector(".chat-footer");
+                    const input = document.getElementById("messageInput");
+
+                    if (isBlocked) {
+                        // Disable everything
+                        if(footer) footer.classList.add("blocked-footer");
+                        if(input) {
+                            input.disabled = true;
+                            input.value = ""; // Clear text
+                            input.placeholder = "You have blocked this user.";
+                        }
+                    } else {
+                        // Enable everything
+                        if(footer) footer.classList.remove("blocked-footer");
+                        if(input) {
+                            input.disabled = false;
+                            input.placeholder = "Type a message...";
+                        }
+                    }
+                }
+            } catch(e) { console.error("Block check error", e); }
+        }
+
+        // --- 3. DELETE FUNCTIONALITY ---
+        window.confirmDeleteChat = () => {
+            new bootstrap.Modal(document.getElementById('deleteConfirmModal')).show();
+        }
+
+        window.executeDelete = async () => {
+            try {
+                await deleteDoc(doc(db, "chats", chatId));
+                // Close modal
+                bootstrap.Modal.getInstance(document.getElementById('deleteConfirmModal')).hide();
+                // Redirect
+                window.location.href = "/Home/Index";
+            } catch (error) {
+                alert("Error deleting chat.");
+                console.error(error);
+            }
+        }
+
+        // --- 4. BLOCK FUNCTIONALITY (With Toggle) ---
+        window.confirmBlockUser = () => {
+            // Update Modal Text based on current state
+            const title = document.getElementById("blockModalTitle");
+            const text = document.getElementById("blockModalText");
+            const btn = document.getElementById("blockModalBtn");
+
+            if (isBlocked) {
+                title.innerText = "Unblock User?";
+                text.innerText = "They will be able to message you again.";
+                btn.innerText = "Yes, Unblock";
+                btn.className = "btn btn-success rounded-pill fw-bold";
+            } else {
+                title.innerText = "Block User?";
+                text.innerText = "You won't receive messages from them anymore.";
+                btn.innerText = "Yes, Block";
+                btn.className = "btn btn-dark rounded-pill fw-bold";
+            }
+
+            new bootstrap.Modal(document.getElementById('blockConfirmModal')).show();
+        }
+
+        window.executeBlockToggle = async () => {
+            if (!activePartnerId) return;
+            const myRef = doc(db, "users", myUid);
+            const modal = bootstrap.Modal.getInstance(document.getElementById('blockConfirmModal'));
+
+            try {
+                if (isBlocked) {
+                    // UNBLOCK
+                    await updateDoc(myRef, { blockedUsers: arrayRemove(activePartnerId) });
+                    alert(`User unblocked.`);
+                } else {
+                    // BLOCK
+                    await updateDoc(myRef, { blockedUsers: arrayUnion(activePartnerId) });
+                    alert(`User blocked.`);
+                }
+
+                modal.hide();
+                checkBlockStatus(); // Refresh UI
+
+                // Optional: Redirect home if you blocked them
+                if(!isBlocked) window.location.href = "/Home/Index";
+
+            } catch (error) {
+                console.error("Block error:", error);
+                alert("Action failed.");
+            }
+        }
+
+        // --- 5. REPORT FUNCTIONALITY (Auto-Block) ---
+        window.submitReport = async () => {
+            const reason = document.getElementById("reportReason").value.trim();
+            if (!reason) return alert("Please enter a reason.");
+
+            try {
+                // A. Save Report
+                await addDoc(collection(db, "reports"), {
+                    reporterId: myUid,
+                    reportedChatId: chatId,
+                    reportedUserId: activePartnerId, // Important
+                    reportedName: partnerName,
+                    reason: reason,
+                    timestamp: new Date().toISOString()
+                });
+
+                // B. Auto-Block Logic
+                const myRef = doc(db, "users", myUid);
+                await updateDoc(myRef, { blockedUsers: arrayUnion(activePartnerId) });
+
+                // C. Clean up
+                const modal = bootstrap.Modal.getInstance(document.getElementById('reportModal'));
+                modal.hide();
+                document.getElementById("reportReason").value = "";
+
+                alert("Report submitted. This user has been automatically blocked.");
+                window.location.href = "/Home/Index";
+
+            } catch (error) {
+                console.error("Error reporting:", error);
+                alert("Failed to send report.");
+            }
         }
         loadHeaderInfo();
 
@@ -688,16 +889,21 @@
 
         // --- SEND & UPLOAD ---
         window.sendMessage = async () => {
+            if (isBlocked) return alert("You cannot message a blocked user."); // Guard Clause
+
             const input = document.getElementById("messageInput");
             const text = input.value.trim();
             if (!text) return;
             input.value = "";
             await saveToDB(text, "text");
         }
+
         window.sendStarter = async (text) => { await saveToDB(text, "text"); }
         window.handleEnter = (e) => { if(e.key === "Enter") sendMessage(); }
 
         window.handleFileUpload = () => {
+            if (isBlocked) return alert("You cannot message a blocked user."); // Guard Clause
+
             const fileInput = document.getElementById('fileInput');
             const subjectSelect = document.getElementById('subjectSelect');
             if (fileInput.files.length === 0) return alert("Select file!");

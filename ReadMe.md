@@ -23,10 +23,8 @@ Step 4: Open in Browser
 Hold Ctrl and click the localhost link in your terminal.
 
 Important: How to use the App
-1. Generate Fake Data (First Time Only) ---meronnn na dummy users so oki na to pero if ever di lumabas sayo edi gewch
-If the database is empty, go to this URL to create 10 dummy students for the algorithm to match you with: http://localhost:YOUR_PORT/Home/Seeder (Click the "Generate" button once).
 
-2. Sign Up & Test
+1. Sign Up & Test
 Go to Sign Up.
 
 Create an account (e.g., test@pup.edu.ph).
